@@ -3,10 +3,13 @@
 #include <functional>
 #include <Windows.h>
 
-#include <d3d12.h>
+#include <directX/d3d12.h>
 #include <DirectXMath.h>
 
-#include "Event.h"
+#include "Events/Event.h"
+#include "Events/WindowEvents.h"
+#include "Events/InputEvents.h"
+#include "D3D12Context.h"
 
 namespace Sign {
 	struct WindowSpecifications {
@@ -17,6 +20,7 @@ namespace Sign {
 		bool VSync = true;
 
 		using EventCallbackFn = std::function<void(Event&)>;
+		EventCallbackFn EventCallback;
 	};
 	class Window
 	{
@@ -29,6 +33,7 @@ namespace Sign {
 		void Destroy();
 
 		void Update();
+		void PollEvents();
 
 		DirectX::XMFLOAT2 GetFrameBufferSize() const;
 		DirectX::XMFLOAT2 GetMousePos() const;
@@ -42,6 +47,8 @@ namespace Sign {
 		static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 	private:
 		WindowSpecifications m_WindowsSpecification;
+
+		std::unique_ptr<D3D12Context> m_Context;
 
 		HWND m_WindowsHandle = nullptr;
 		HINSTANCE m_InstanceHandle = nullptr;

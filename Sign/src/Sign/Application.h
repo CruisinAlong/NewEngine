@@ -1,8 +1,20 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <ranges>
+#include <print>
+#include <directX/d3d12.h>
+#include <wrl.h>
+#include <dxgi1_6.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+#include <directX/d3d12sdklayers.h>
+#include <iostream>
 #include "Window.h"
 #include "Layer.h"
+#include "LayerStack.h"
+#include "Events/Event.h"
+#include "Events/WindowEvents.h"
 
 
 namespace Sign {
@@ -17,17 +29,23 @@ namespace Sign {
 		~Application();
 
 		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* layer);
 
 		void Run();
 		void Stop();
 
+		void RaiseEvent(Event& event);
 		Window& GetWindow() { return *m_Window; }
+
+		bool OnWindowClosedEvent(WindowClosedEvent& e);
+		bool OnWindowResizedEvent(WindowResizedEvent& e);
 
 
 		static Application& Get();
 	private:
 		ApplicationSpecifications m_Specifications;
 		std::shared_ptr<Window> m_Window;
+		LayerStack m_LayerStack;
 		bool m_Running = false;
 	};
 }

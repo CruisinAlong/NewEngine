@@ -3,6 +3,7 @@
 namespace Sign {
 	Window::Window(const WindowSpecifications& specification) : m_WindowsSpecification(specification)
 	{
+
 	}
 	Window::~Window()
 	{
@@ -11,7 +12,7 @@ namespace Sign {
 	void Window::Create()
 	{
 		m_InstanceHandle = GetModuleHandle(nullptr);
-
+		
 		WNDCLASSEX wc;
 		wc.cbClsExtra = NULL;
 		wc.cbSize = sizeof(WNDCLASSEX);
@@ -50,6 +51,10 @@ namespace Sign {
 		if (!m_WindowsHandle)
 			assert(false && "Failed to create Window Handle!");
 
+		m_Context = std::make_unique<D3D12Context>(m_WindowsHandle,m_WindowsSpecification.Width,m_WindowsSpecification.Height);
+		m_Context->Init();
+
+		::SetWindowLongPtr(m_WindowsHandle, GWLP_USERDATA, (LONG_PTR)this);
 		::ShowWindow(m_WindowsHandle, SW_SHOW);
 		::UpdateWindow(m_WindowsHandle);
 	}
@@ -68,16 +73,21 @@ namespace Sign {
 	}
 	void Window::Update()
 	{
+		m_Context->SwapBuffers();
+
+		//window->onUpdate();
+
+	}
+	void Window::PollEvents()
+	{
 		MSG msg;
 		while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-		//window->onUpdate();
-
 	}
+	
 	DirectX::XMFLOAT2 Window::GetFrameBufferSize() const
 	{
 		return DirectX::XMFLOAT2();
@@ -93,14 +103,47 @@ namespace Sign {
 
 	LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
+		Window* window = (Window*)::GetWindowLongPtr(hwnd, GWLP_USERDATA);
 		switch (msg)
 		{
-		case WM_CREATE:
-			
+		case WM_CLOSE: {
+			window->m_ShouldClose = true;
+			WindowClosedEvent e;
+			window->m_WindowsSpecification.EventCallback(e);
 			break;
+		}
 		case WM_DESTROY:
 			::PostQuitMessage(0);
 			break;
+
+		case WM_KEYDOWN:
+		{
+			bool isRepeat = (lparam & 0x40000000);
+			KeyPressedEvent e((int)wparam, isRepeat);
+			window->m_WindowsSpecification.EventCallback(e);
+			break;
+		}
+		case WM_KEYUP:
+		{
+			KeyReleasedEvent e((int)wparam);
+			window->m_WindowsSpecification.EventCallback(e);
+			break;
+		}
+		case WM_SIZE:
+		{
+			uint32_t width = LOWORD(lparam);
+			uint32_t height = HIWORD(lparam);
+			WindowResizedEvent e(width,height);
+			window->m_WindowsSpecification.EventCallback(e);
+			break;
+		}
+
+		case WM_MBUTTONDOWN:
+		{
+			MouseButtonPressedEvent e((int)wparam);
+			window->m_WindowsSpecification.EventCallback(e);
+			break;
+		}
 		default:
 			return ::DefWindowProc(hwnd, msg, wparam, lparam);
 		}

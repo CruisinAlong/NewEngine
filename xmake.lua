@@ -3,7 +3,7 @@ add_rules("plugin.vsxmake.autoupdate")
 set_arch(os.arch())
 add_rules("mode.debug","mode.release")
 set_defaultmode("debug")
-add_requires("directx-headers")
+--add_requires("directx-headers")
 
 outputdir = ""
 if is_mode("debug") then
@@ -22,16 +22,17 @@ target("Sign")
 	set_objectdir("bin-int/".. outputdir .. "/Sign")
 
 	--set_pcxxheader("Core/src/aepch.h")
-	add_headerfiles("Sign/src/**.h","d3dx12.h")
+	add_headerfiles("Sign/src/**.h")
 	add_files("Sign/src/**.cpp")
 	add_extrafiles("Sign/vendor/**.inl")
 	
-	add_packages("directx-headers")
+	--add_packages("directx-headers")
 	add_defines("_CRT_SECURE_NO_WARNINGS")
 
 	add_includedirs(
 		--"Core/vendor/spdlog/include", 
 		--"Core/vendor/imgui",
+		"Sign/vendor/DirectX-Headers/include",
 		"Sign/src", {public = true} )
 
 	--add_deps("ImGui")

@@ -20,7 +20,7 @@ namespace Sign {
 	public:
 		KeyPressedEvent(int keyCode, bool isRepeated) : KeyEvent(keyCode), m_IsRepeated(isRepeated) {}
 
-		inline bool IsRepeated const{ return m_IsRepeated; };
+		inline bool IsRepeated() const { return m_IsRepeated; };
 		std::string ToString() const override
 		{
 			return std::format("KeyPressedEvent: {} (repeat={})", m_KeyCode, m_IsRepeated);
@@ -116,7 +116,7 @@ namespace Sign {
 			return std::format("MouseScrolledEvent: {} {})", m_XOffest, m_YOffest);
 		}
 
-		EVENT_CLASS_TYPE(MouseScrolled)
+		EVENT_CLASS_TYPE(MouseScroll)
 
 	private:
 		double m_XOffest, m_YOffest;

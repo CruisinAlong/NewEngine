@@ -10,7 +10,7 @@ namespace Sign {
 	public:
 		WindowClosedEvent() {}
 
-		EVENT_CLASS_TYPE(WindowClosed)
+		EVENT_CLASS_TYPE(WindowClose)
 	};
 
 	class WindowResizedEvent : public Event
@@ -22,8 +22,10 @@ namespace Sign {
 		inline uint32_t GetHeight() const { return m_Height; }
 
 		std::string ToString() const override {
-			std::format("WindowResizedEvent: {} {}", m_Width, m_Height);
+			return std::format("WindowResizedEvent: {} {}", m_Width, m_Height);
 		}
+
+		EVENT_CLASS_TYPE(WindowResize)
 
 	private:
 		uint32_t m_Width, m_Height;

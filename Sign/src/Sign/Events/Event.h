@@ -11,7 +11,7 @@ namespace Sign {
 	};
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() {return EventType::type; }\
-								virtual EventType GetEventName() const override {return GetStaticType();}\
+								virtual EventType GetEventType() const override {return GetStaticType();}\
 								virtual const char* GetName() const override {return #type;}
 	class Event
 	{
@@ -35,7 +35,7 @@ namespace Sign {
 		template<typename T>
 		bool Dispatch(EventFn<T> func) {
 
-			if(m_Event.GetEventType() == T::GetStatcType() && !m_Event.m_Handled)
+			if(m_Event.GetEventType() == T::GetStaticType() && !m_Event.m_Handled)
 			{
 				m_Event.m_Handled = func(*(T*)&m_Event);
 				return true;

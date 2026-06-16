@@ -7,6 +7,6 @@ if %errorlevel% == 0 (
 ) else (
     start /wait "" Vendor\Binaries\Xmake\Windows\xmake-v3.0.5.win64.exe
 )
-xmake project -k vs2026 -m "debug;release"
+xmake project -k vs -m "debug;release"
 popd
 pause

@@ -8,7 +8,7 @@
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
-#include <directX/d3d12sdklayers.h>
+#include <directx/d3d12sdklayers.h>
 #include <iostream>
 #include "Window.h"
 #include "Layer.h"

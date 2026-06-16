@@ -69,13 +69,11 @@ namespace Sign {
 			UnregisterClass("SignEngineWindowClass", m_InstanceHandle);
 			m_InstanceHandle = nullptr;
 		}
-			
+		std::println("Window Destroyed");
 	}
 	void Window::Update()
 	{
 		m_Context->SwapBuffers();
-
-		//window->onUpdate();
 
 	}
 	void Window::PollEvents()

@@ -7,9 +7,11 @@ namespace Sign {
 	}
 	void Shader::Compile()
 	{
-		CompileShader(m_VertexPath, "main", "vs_6_8", &vertexShaderBlob);
-		CompileShader(m_PixelPath, "main", "ps_6_8", &pixelShaderBlob);
-		CompileShader(m_PixelPath, "main", "cs_6_8", &pixelShaderBlob);
+		CompileShader(m_VertexPath, "main", "vs_5_1", &vertexShaderBlob);
+		CompileShader(m_PixelPath, "main", "ps_5_1", &pixelShaderBlob);
+
+		if(m_ComputePath)
+			CompileShader(m_ComputePath, "main", "cs_5_1", &computeShaderBlob);
 	
 	}
 	void Shader::CompileShader(const WCHAR* path, const char* entryPoint, const char* target, ID3DBlob** blob)
@@ -31,6 +33,9 @@ namespace Sign {
 			&errorBlob);
 
 		if (FAILED(hr))
+		{
 			assert(false && "Shader Compilation Failed");
+		}
+
 	}
 }

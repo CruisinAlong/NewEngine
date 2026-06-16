@@ -5,16 +5,6 @@ namespace Sign {
 	Application::Application(const ApplicationSpecifications& specifications)
 	{
 		s_Application = this;
-
-		if (m_Specifications.WindowSpec.Title.empty())
-			m_Specifications.WindowSpec.Title = m_Specifications.name;
-
-		m_Specifications.WindowSpec.EventCallback = [this](Event& event) {return RaiseEvent(event); };
-
-		m_Window = std::make_unique<Window>(m_Specifications.WindowSpec);
-		m_Window->Create();
-		Renderer::Init(m_Window->GetContext());
-
 #if defined(SIGN_DEBUG)
 		Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
@@ -29,12 +19,22 @@ namespace Sign {
 			}
 		}
 #endif
+		if (m_Specifications.WindowSpec.Title.empty())
+			m_Specifications.WindowSpec.Title = m_Specifications.name;
+
+		m_Specifications.WindowSpec.EventCallback = [this](Event& event) {return RaiseEvent(event); };
+
+		m_Window = std::make_unique<Window>(m_Specifications.WindowSpec);
+		m_Window->Create();
+		Renderer::Init(m_Window->GetContext());
+
+
 
 	}
 	Application::~Application()
 	{
+		Renderer::ShutDown();
 		std::println("App Destroyed");
-		m_Window->Destroy();
 		s_Application = nullptr;
 	}
 
@@ -94,7 +94,10 @@ namespace Sign {
 
 	bool Application::OnWindowResizedEvent(WindowResizedEvent& e)
 	{
-		Renderer::OnWindowResize();
+		if (e.GetWidth() == 0 || e.GetHeight() == 0) {
+			return false;
+		}
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 		return false;
 	}
 

@@ -17,11 +17,11 @@ struct VertexShaderOutput
     float4 Position : SV_Position;
 };
 
-VertexShaderOutput main(VertexPosColor IN) 
+VertexShaderOutput main(VertexPosColor IN)
 {
     VertexShaderOutput OUT;
     
     OUT.Position = mul(ModelViewProjectionCB.MVP, IN.Position);
     OUT.Color = IN.Color;
-	return OUT;
+    return OUT;
 }

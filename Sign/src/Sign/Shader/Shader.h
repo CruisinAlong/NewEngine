@@ -3,11 +3,13 @@
 #include <wrl.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+#include <print>
+#include <iostream>
 namespace Sign {
 	class Shader
 	{
 	public:
-		Shader(const WCHAR* vertexSrc, const WCHAR* pixelSrc, const WCHAR* computeSrc);
+		Shader(const WCHAR* vertexSrc, const WCHAR* pixelSrc, const WCHAR* computeSrc = nullptr);
 
 		void Compile();
 

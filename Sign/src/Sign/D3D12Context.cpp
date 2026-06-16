@@ -23,6 +23,7 @@ namespace Sign {
 
 		m_SwapChain->Present(syncInterval, presentFlags);
 		m_CurrentBackBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
+		GetCommandQueue()->WaitForFenceValue(m_FrameFenceValues[m_CurrentBackBufferIndex]);
 	}
 
 	void D3D12Context::CreateDevice()

@@ -145,12 +145,54 @@ namespace D3D12Utils {
 		return descriptorHeap;
 	}
 
-	static inline void TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList, Microsoft::WRL::ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState)
+	static void TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList, Microsoft::WRL::ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState)
 	{
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 			resource.Get(),
 			beforeState, afterState);
 
 		commandList->ResourceBarrier(1, &barrier);
+	}
+
+	static void UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device2> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ID3D12Resource** pDestinationResource, ID3D12Resource** pIntermediateResource,
+		size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE)
+	{
+		size_t bufferSize = numElements * elementSize;
+
+
+		auto heapProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		auto resourceDescription = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
+		//Create Destination Resource
+		device->CreateCommittedResource(
+			&heapProperty,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDescription,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(pDestinationResource));
+
+		//Create Intermediate Resource
+		if (bufferData)
+		{
+			auto uploadHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			auto uploadBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+			device->CreateCommittedResource(
+				&uploadHeap,
+				D3D12_HEAP_FLAG_NONE,
+				&uploadBufferDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(pIntermediateResource));
+
+			//Transfer CPU buffer to GPU resources
+
+			D3D12_SUBRESOURCE_DATA subResourceData = {};
+			subResourceData.pData = bufferData;
+			subResourceData.RowPitch = bufferSize;
+			subResourceData.SlicePitch = subResourceData.RowPitch;
+
+			UpdateSubresources(commandList.Get(), *pDestinationResource, *pIntermediateResource, 0, 0, 1, &subResourceData);
+		}
 	}
 }

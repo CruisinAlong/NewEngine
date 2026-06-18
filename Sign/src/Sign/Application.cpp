@@ -19,6 +19,7 @@ namespace Sign {
 			}
 		}
 #endif
+		m_Specifications = specifications;
 		if (m_Specifications.WindowSpec.Title.empty())
 			m_Specifications.WindowSpec.Title = m_Specifications.name;
 
@@ -82,6 +83,7 @@ namespace Sign {
 		std::println("{}", event.ToString());
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowClosedEvent>([this](WindowClosedEvent& event) {return OnWindowClosedEvent(event); });
+		//dispatcher.Dispatch<WindowResizedEvent>([this](WindowResizedEvent& event) {return OnWindowResizedEvent(event); });
 
 		for (const auto& layer : std::views::reverse(m_LayerStack)) {
 			layer->OnEvent(event);

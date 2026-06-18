@@ -104,12 +104,20 @@ target("App")
 		add_defines("_WIN32_WINNT=0x0A00") 
 		add_defines("SIGN_PLATFORM_WINDOWS")
 	end
+	on_load(function(target)
+		local shaderSrc = path.join(os.projectdir(), "App/src/Shader")
+		local arch = os.arch()
+		local mode = is_mode("debug") and "Debug" or "Release"
+		local shaderDest = path.join(os.projectdir(),"bin",mode.."-"..arch,"App", "Shader")
+		os.mkdir(shaderDest)
+        os.cp(shaderSrc .. "/**.hlsl", shaderDest)
+	end)
 
 	after_build(function(target)
 		local shaderSrc = path.join(os.projectdir(), "App/src/Shader")
-		local shaderDesc = path.join(target:targetdir(), "Shader")
-		os.mkdir(shaderDesc)
-		os.cp(shaderSrc .. "/**.hlsl", shaderDesc)
+		local shaderDest = path.join(target:targetdir(), "Shader")
+		os.mkdir(shaderDest)
+		os.cp(shaderSrc .. "/**.hlsl", shaderDest)
 	end)
 
 	if is_mode("debug") then

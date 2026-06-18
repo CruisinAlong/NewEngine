@@ -51,10 +51,12 @@ namespace Sign {
 		if (!m_WindowsHandle)
 			assert(false && "Failed to create Window Handle!");
 
+		::SetWindowLongPtr(m_WindowsHandle, GWLP_USERDATA, (LONG_PTR)this);
+
 		m_Context = std::make_unique<D3D12Context>(m_WindowsHandle,m_WindowsSpecification.Width,m_WindowsSpecification.Height);
 		m_Context->Init();
 
-		::SetWindowLongPtr(m_WindowsHandle, GWLP_USERDATA, (LONG_PTR)this);
+		
 		::ShowWindow(m_WindowsHandle, SW_SHOW);
 		::UpdateWindow(m_WindowsHandle);
 	}
@@ -118,6 +120,7 @@ namespace Sign {
 		{
 			bool isRepeat = (lparam & 0x40000000);
 			KeyPressedEvent e((int)wparam, isRepeat);
+			std::println("WParam: {}", wparam);
 			window->m_WindowsSpecification.EventCallback(e);
 			break;
 		}
@@ -131,8 +134,11 @@ namespace Sign {
 		{
 			uint32_t width = LOWORD(lparam);
 			uint32_t height = HIWORD(lparam);
-			WindowResizedEvent e(width,height);
-			window->m_WindowsSpecification.EventCallback(e);
+
+			if (window && window->m_Context) {
+				WindowResizedEvent e(width, height);
+				window->m_WindowsSpecification.EventCallback(e);
+			}
 			break;
 		}
 

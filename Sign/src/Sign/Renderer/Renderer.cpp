@@ -23,6 +23,7 @@ namespace Sign
 	void Renderer::ShutDown()
 	{
 		std::println("Renderer Shutdown");
+		
 		s_Context->FlushCommandQueue();
 	}
 

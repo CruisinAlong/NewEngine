@@ -27,6 +27,7 @@ public:
 	virtual void OnEvent(Sign::Event& event) override;
 	virtual void OnRender() override;
 	bool OnWindowResizedEvent(Sign::WindowResizedEvent& e);
+	bool OnKeyPressedEvent(Sign::KeyPressedEvent& e);
 
 private:
 	std::shared_ptr<Sign::VertexArray> m_VertexArray;

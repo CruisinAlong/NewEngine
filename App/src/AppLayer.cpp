@@ -82,12 +82,13 @@ void AppLayer::OnEvent(Sign::Event& event)
 	}
 	Sign::EventDispatcher dispatch(event);
 	dispatch.Dispatch<Sign::WindowResizedEvent>([this](Sign::WindowResizedEvent& event) {return OnWindowResizedEvent(event); });
+	//dispatch.Dispatch<Sign::KeyPressedEvent>([this](Sign::KeyPressedEvent& event) {return OnKeyPressedEvent(event); });
 
 }
 
 void AppLayer::OnRender()
 {
-	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+	FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	Sign::Renderer::BeginScene(clearColor, m_EditorCamera);
 	Sign::Renderer::Submit(m_VertexArray, *m_GraphicsPipeline, DirectX::XMMatrixIdentity());
 	for (auto& mesh : m_Meshes) {
@@ -99,5 +100,14 @@ void AppLayer::OnRender()
 bool AppLayer::OnWindowResizedEvent(Sign::WindowResizedEvent& e)
 {
 	m_EditorCamera.SetViewPortSize(e.GetWidth(), e.GetHeight());
+	return false;
+}
+
+bool AppLayer::OnKeyPressedEvent(Sign::KeyPressedEvent& e)
+{
+
+	if (e.GetKeyCode() == Sign::Key::Esc) {
+		Sign::Application::Get().Stop();
+	}
 	return false;
 }

@@ -52,7 +52,7 @@ namespace Sign {
 	{
 		UINT createFactoryFlags = 0;
 		CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&m_Factory4));
-
+		
 		m_SwapChain = D3D12Utils::CreateSwapChain(m_WindowHandle, m_Factory4, GetCommandQueue()->GetCommandQueue(), m_Width, m_Height, D3D12Utils::g_NumFrames);
 	}
 

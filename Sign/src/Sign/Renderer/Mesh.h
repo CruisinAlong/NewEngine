@@ -1,35 +1,35 @@
 #pragma once
-#include <DirectXMath.h>
 #include <cstdint>
 #include "Sign/Buffers/VertexArray.h"
+#include "Sign/Math/SignMath.h"
 
 namespace Sign {
 	class Mesh
 	{
 	public:
 		Mesh(const void* vertices, uint32_t vertexCount, const WORD* indices, uint32_t indexCount, 
-			const DirectX::XMFLOAT3& translation,
-			const DirectX::XMFLOAT3& scale,
-			const DirectX::XMFLOAT4& rotation);
+			const Vector3D& translation,
+			const Vector3D& scale,
+			const Vector3D& rotation);
 		~Mesh() = default;
 
-		const DirectX::XMMATRIX& GetTransform() const { return m_Transform; }
-		const DirectX::XMFLOAT3& GetTranslation() const { return m_Translation; }
-		const DirectX::XMFLOAT3& GetScale() const { return m_Scale; }
-		const DirectX::XMFLOAT4& GetRotation() const { return m_Rotation; }
+		const Mat4& GetTransform() const { return m_Transform; }
+		const Vector3D& GetTranslation() const { return m_Translation; }
+		const Vector3D& GetScale() const { return m_Scale; }
+		const Vector3D& GetRotation() const { return m_Rotation; }
 		const std::shared_ptr<VertexArray>& GetVertexArray() const { return m_VertexArray; }
 
 
-		void SetTranslation(const DirectX::XMFLOAT3& pos) { m_Translation = pos; RecalculateTransform(); }
-		void SetScale(const DirectX::XMFLOAT3& scale) { m_Scale = scale; RecalculateTransform(); };
-		void SetRotation(const DirectX::XMFLOAT4& rotation) { m_Rotation = rotation; RecalculateTransform(); };
+		void SetTranslation(const Vector3D& pos) { m_Translation = pos; RecalculateTransform(); }
+		void SetScale(const Vector3D& scale) { m_Scale = scale; RecalculateTransform(); };
+		void SetRotation(const Vector3D& rotation) { m_Rotation = rotation; RecalculateTransform(); };
 	private:
 		void RecalculateTransform();
 	private:
-		DirectX::XMFLOAT3 m_Translation;
-		DirectX::XMFLOAT3 m_Scale;
-		DirectX::XMFLOAT4 m_Rotation;
-		DirectX::XMMATRIX m_Transform;
+		Vector3D m_Translation;
+		Vector3D m_Scale;
+		Vector3D m_Rotation;
+		Mat4 m_Transform;
 
 		std::shared_ptr<VertexArray> m_VertexArray;
 	};

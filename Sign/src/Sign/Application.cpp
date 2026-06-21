@@ -28,14 +28,16 @@ namespace Sign {
 		m_Window = std::make_unique<Window>(m_Specifications.WindowSpec);
 		m_Window->Create();
 		Renderer::Init(m_Window->GetContext());
-
+		Renderer::Resizebuffers(m_Window->GetContext()->GetWidth(), m_Window->GetContext()->GetHeight());
 
 
 	}
 	Application::~Application()
 	{
 		Renderer::ShutDown();
+		m_Window.reset();
 		std::println("App Destroyed");
+
 		s_Application = nullptr;
 	}
 
@@ -66,6 +68,7 @@ namespace Sign {
 				layer->OnUpdate(ts);
 			}
 
+			//If Multi-threaded, implement Rendering in OnUpdate to solve asynchronous problems like race conditions
 			for (const auto& layer : m_LayerStack) {
 				layer->OnRender();
 			}
@@ -83,7 +86,7 @@ namespace Sign {
 		std::println("{}", event.ToString());
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowClosedEvent>([this](WindowClosedEvent& event) {return OnWindowClosedEvent(event); });
-		//dispatcher.Dispatch<WindowResizedEvent>([this](WindowResizedEvent& event) {return OnWindowResizedEvent(event); });
+		dispatcher.Dispatch<WindowResizedEvent>([this](WindowResizedEvent& event) {return OnWindowResizedEvent(event); });
 
 		for (const auto& layer : std::views::reverse(m_LayerStack)) {
 			layer->OnEvent(event);

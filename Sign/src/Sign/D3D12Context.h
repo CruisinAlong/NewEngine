@@ -15,7 +15,7 @@ namespace Sign {
 		void SwapBuffers();
 
 
-		Microsoft::WRL::ComPtr<IDXGIAdapter4> GetAdapter(bool useWarp);
+		Microsoft::WRL::ComPtr<IDXGIAdapter4>			GetAdapter(bool useWarp);
 
 		std::shared_ptr<D3D12CommandQueue>				GetCommandQueue(D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT) const;
 		Microsoft::WRL::ComPtr<ID3D12Device2>			GetDevice() { return m_Device; }
@@ -34,11 +34,15 @@ namespace Sign {
 		CD3DX12_CPU_DESCRIPTOR_HANDLE					GetCPUHandleAt(unsigned int index);
 		CD3DX12_GPU_DESCRIPTOR_HANDLE					GetGPUHandleAt(unsigned int index);
 
+		uint32_t										GetWidth() const { return m_Width; }
+		uint32_t										GetHeight() const { return m_Height; }
 		void ResizeDepthBuffer(int width, int height);
+		void ResizeSwapBuffer(uint32_t width, uint32_t height);
 
 		void SetFrameFenceValues(uint64_t fenceValue);
 
 		void FlushCommandQueue();
+		void UpdateRenderTargetViews();
 
 	private:
 

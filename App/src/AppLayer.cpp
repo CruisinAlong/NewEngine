@@ -8,7 +8,7 @@ AppLayer::AppLayer()
 void AppLayer::OnAttach()
 {
 	m_EditorCamera = Sign::PerspectiveCamera(Sign::Application::Get().GetWindow().GetWidth(), Sign::Application::Get().GetWindow().GetHeight());
-	m_EditorCamera.SetPerspective(DirectX::XMConvertToRadians(45.0f), 0.1f, 1000.0f);
+	m_EditorCamera.SetPerspective(MathUtils::ConvertToRadians(45.0f), 0.1f, 1000.0f);
 
 	m_Shader = std::make_shared<Sign::Shader>(L"Shader/VertexShader.hlsl", L"Shader/PixelShader.hlsl");
 	Sign::PipelineSpecifications pSpecs = {};
@@ -26,9 +26,9 @@ void AppLayer::OnAttach()
 
 	VertexPosColor triangleVertices[3] =
 	{
-		{DirectX::XMFLOAT3(0.0,0.5,0.0), DirectX::XMFLOAT3(1.0,0.0,0.0)},
-		{DirectX::XMFLOAT3(0.5,-0.5,0.0), DirectX::XMFLOAT3(0.0,1.0,0.0)},
-		{DirectX::XMFLOAT3(-0.5,-0.5,0.0), DirectX::XMFLOAT3(0.0,0.0,1.0)}
+		{Sign::Vector3D(0.0,0.5,0.0), Sign::Vector3D(1.0,0.0,0.0)},
+		{Sign::Vector3D(0.5,-0.5,0.0), Sign::Vector3D(0.0,1.0,0.0)},
+		{Sign::Vector3D(-0.5,-0.5,0.0), Sign::Vector3D(0.0,0.0,1.0)}
 	};
 
 	m_VertexArray = std::make_shared<Sign::VertexArray>();
@@ -42,7 +42,7 @@ void AppLayer::OnAttach()
 	m_VertexArray->SetIndexBuffer(triangleIB);
 
 
-	auto Cube = Sign::Primitive::Cube3D::Create({ 0.0f,0.0f,1.f }, { 0.5f,0.5f,0.5f }, { 0.0f, 0.0f, 0.0f,0.0f }, {
+	auto Cube = Sign::Primitive::Cube3D::Create({ 0.0f,0.0f,1.f }, { 0.5f,0.5f,0.5f }, { 0.0f, 0.0f, 0.0f }, {
 		{{ 0.0f, 1.0f, 0.0f },
 		{ 1.0f, 1.0f, 0.0f },
 		{ 1.0f, 0.0f, 0.0f },
@@ -59,15 +59,40 @@ void AppLayer::OnAttach()
 	m_Meshes.push_back(Cube2);
 	m_Meshes.push_back(plane);
 
+	for (int i = 0; i < 100; i++) {
+		auto Cube = Sign::Primitive::Cube3D::Create({ 0.0f,0.0f,0.f }, { 0.5f,0.5f,0.5f }, { 0.0f, 0.0f, 0.0f }, {
+		{{ 0.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 1.0f }
+		} });
+		Cube->SetTranslation({ get_random_int(-5.0f,5.0f),get_random_int(-5.0f,5.0f) ,get_random_int(-5.0f,5.0f) });
+		m_Meshes.push_back(Cube);
+	}
+
 
 	Sign::Renderer::CPUSyncToGPU();
-	Sign::Renderer::ResizeDepthbuffer(Sign::Application::Get().GetWindow().GetWidth(), Sign::Application::Get().GetWindow().GetHeight());
+	//Sign::Renderer::Resizebuffers(Sign::Application::Get().GetWindow().GetWidth(), Sign::Application::Get().GetWindow().GetHeight());
 }
+float AppLayer::get_random_int(float min, float max) {
+	// 'static' means these initialize exactly ONCE, not every frame
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
 
+	std::uniform_real_distribution<float> distrib(min, max);
+	return distrib(gen);
+}
 void AppLayer::OnUpdate(float ts)
 {
 	if (Sign::Input::IsKeyPressed(Sign::Key::A)) {
 		std::println("A");
+	}
+
+	if (Sign::Input::IsKeyPressed(Sign::Key::Esc)) {
+		Sign::Application::Get().Stop();
 	}
 	
 	m_EditorCamera.OnUpdate(ts);
@@ -82,7 +107,7 @@ void AppLayer::OnEvent(Sign::Event& event)
 	}
 	Sign::EventDispatcher dispatch(event);
 	dispatch.Dispatch<Sign::WindowResizedEvent>([this](Sign::WindowResizedEvent& event) {return OnWindowResizedEvent(event); });
-	//dispatch.Dispatch<Sign::KeyPressedEvent>([this](Sign::KeyPressedEvent& event) {return OnKeyPressedEvent(event); });
+	dispatch.Dispatch<Sign::KeyPressedEvent>([this](Sign::KeyPressedEvent& event) {return OnKeyPressedEvent(event); });
 
 }
 
@@ -90,7 +115,7 @@ void AppLayer::OnRender()
 {
 	FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	Sign::Renderer::BeginScene(clearColor, m_EditorCamera);
-	Sign::Renderer::Submit(m_VertexArray, *m_GraphicsPipeline, DirectX::XMMatrixIdentity());
+	Sign::Renderer::Submit(m_VertexArray, *m_GraphicsPipeline, Sign::Mat4::identity());
 	for (auto& mesh : m_Meshes) {
 		Sign::Renderer::Submit(mesh->GetVertexArray(), *m_GraphicsPipeline, mesh->GetTransform());
 	}

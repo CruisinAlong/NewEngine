@@ -4,15 +4,16 @@
 #include <vector>
 #include "Sign/Renderer/Mesh.h"
 #include "Sign/Renderer/MeshUtils.h"
+#include "Sign/Math/SignMath.h"
 namespace Sign {
 	namespace Primitive {
-		static constexpr std::array<DirectX::XMFLOAT3, 8> cubePosition = { {
+		static const std::array<Vector3D, 8> cubePosition = { {
 			{-1.0,-1.0,-1.0} , {-1.0,1.0,-1.0 },
 			{ 1.0,1.0,-1.0 } , { 1.0,-1.0,-1.0 },
 			{ -1.0,-1.0,1.0 }, { -1.0,1.0,1.0 },
 			{ 1.0,1.0,1.0 }  , { 1.0,-1.0,1.0 }
 		} };
-		static constexpr std::array<DirectX::XMFLOAT3, 4> planePosition = { {
+		static const std::array<Vector3D, 4> planePosition = { {
 			{-1.0,0.0,1.0 } , 
 			{ 1.0,0.0,1.0 } ,
 			{ 1.0,0.0,-1.0 }, 
@@ -22,10 +23,10 @@ namespace Sign {
 		{
 		public:
 			static std::shared_ptr<Mesh> Create(
-				const DirectX::XMFLOAT3& translation = {0.0f,0.0f,0.0f},
-				const DirectX::XMFLOAT3& scale = {1.0f,1.0f,1.0f},
-				const DirectX::XMFLOAT4& rotation = {0.0f, 0.0f, 0.0f,0.0f},
-				const std::array<DirectX::XMFLOAT3,8>& color = {{
+				const Vector3D& translation = {0.0f,0.0f,0.0f},
+				const Vector3D& scale = {1.0f,1.0f,1.0f},
+				const Vector3D& rotation = {0.0f, 0.0f, 0.0f},
+				const std::array<Vector3D,8>& color = {{
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
@@ -37,10 +38,10 @@ namespace Sign {
 		{
 		public:
 			static std::shared_ptr<Mesh> Create(
-				const DirectX::XMFLOAT3& translation = { 0.0f,0.0f,0.0f },
-				const DirectX::XMFLOAT3& scale = { 1.0f,1.0f,1.0f },
-				const DirectX::XMFLOAT4& rotation = { 0.0f, 0.0f, 0.0f,0.0f },
-				const std::array<DirectX::XMFLOAT3, 8>& color = { {
+				const Vector3D& translation = { 0.0f,0.0f,0.0f },
+				const Vector3D& scale = { 1.0f,1.0f,1.0f },
+				const Vector3D& rotation = { 0.0f, 0.0f, 0.0f},
+				const std::array<Vector3D, 8>& color = { {
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
@@ -51,10 +52,10 @@ namespace Sign {
 		class Plane {
 		public:
 			static std::shared_ptr<Mesh> Create(
-				const DirectX::XMFLOAT3& translation = { 0.0f,-5.0f,0.0f },
-				const DirectX::XMFLOAT3& scale = { 10.0f,1.0f,10.0f },
-				const DirectX::XMFLOAT4& rotation = { 0.0f, 0.0f, 0.0f,0.0f },
-				const std::array<DirectX::XMFLOAT3, 4>& color = { {
+				const Vector3D& translation = { 0.0f,0.0f,0.0f },
+				const Vector3D& scale = { 10.0f,1.0f,10.0f },
+				const Vector3D& rotation = { 0.0f, 0.0f, 0.0f },
+				const std::array<Vector3D, 4>& color = { {
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f}} }
 					);

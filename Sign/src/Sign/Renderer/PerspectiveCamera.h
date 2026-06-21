@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Sign/Events/Event.h"
 #include "Sign/Input.h"
+#include "Sign/Math/SignMath.h"
 namespace Sign {
 	class PerspectiveCamera : public Camera
 	{
@@ -26,14 +27,14 @@ namespace Sign {
 		float GetPerspectiveNearClip() const { return m_PerspectiveNearClip; }
 		void SetPerspectiveNearClip(float nearClip) { m_PerspectiveNearClip = nearClip; RecalculateProjection(); }
 
-		DirectX::XMFLOAT3 GetForwardDirection() const;
-		DirectX::XMFLOAT3 GetRightDirection() const;
-		DirectX::XMFLOAT3 GetUpDirection() const;
-		DirectX::XMFLOAT3 GetPosition() const;
-		DirectX::XMVECTOR GetOrientation() const;
+		Vector3D GetForwardDirection() const;
+		Vector3D GetRightDirection() const;
+		Vector3D GetUpDirection() const;
+		Vector3D GetPosition() const;
+		Quaternion GetOrientation() const;
 
-		const DirectX::XMMATRIX& GetViewMatrix() const{ return m_ViewMatrix; }
-		DirectX::XMMATRIX GetViewProjectionMatrix() const { return DirectX::XMMatrixMultiply(m_ProjectionMatrix, m_ViewMatrix); }
+		const Mat4& GetViewMatrix() const{ return m_ViewMatrix; }
+		Mat4 GetViewProjectionMatrix() const { return m_ProjectionMatrix * m_ViewMatrix; }
 		
 	private:
 		void RecalculateProjection();
@@ -43,10 +44,10 @@ namespace Sign {
 		float RotationSpeed();
 
 	private:
-		DirectX::XMMATRIX m_ViewMatrix;
-		DirectX::XMFLOAT3  m_Position = { 0.0f,0.0f,0.0f };
-		DirectX::XMFLOAT3  m_FocalPoint = { 0.0f,0.0f,0.0f };
-		DirectX::XMFLOAT2 m_InitialMousePosition = { 0.0f,0.0f };
+		Mat4 m_ViewMatrix;
+		Vector3D  m_Position = { 0.0f,0.0f,0.0f };
+		Vector3D  m_FocalPoint = { 0.0f,0.0f,0.0f };
+		Vector2D m_InitialMousePosition = { 0.0f,0.0f };
 
 		float m_PerspectiveFOV = DirectX::XMConvertToRadians(45.0f);
 		float m_PerspectiveFarClip = 1000.0f;

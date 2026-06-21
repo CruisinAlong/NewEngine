@@ -61,18 +61,7 @@ namespace Sign {
 		m_RTVHeap = D3D12Utils::CreateDescriptorHeap(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12Utils::g_NumFrames, false);
 		m_RTVDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_RTVHeap->GetCPUDescriptorHandleForHeapStart());
-
-		for (int i = 0; i < D3D12Utils::g_NumFrames; i++)
-		{
-			Microsoft::WRL::ComPtr<ID3D12Resource> backBuffer;
-			m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
-
-			m_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
-			m_BackBuffers[i] = backBuffer;
-
-			rtvHandle.Offset(m_RTVDescriptorSize);
-		}
+		UpdateRenderTargetViews();
 	}
 
 	void D3D12Context::CreateCBV_SRV_UAV_Heap()
@@ -97,6 +86,21 @@ namespace Sign {
 		m_DirectCommandQueue->Flush();
 		m_ComputeCommandQueue->Flush();
 		m_CopyCommandQueue->Flush();
+	}
+
+	void D3D12Context::UpdateRenderTargetViews()
+	{
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_RTVHeap->GetCPUDescriptorHandleForHeapStart());
+
+		for (int i = 0; i < D3D12Utils::g_NumFrames; i++)
+		{
+			m_BackBuffers[i].Reset();
+			m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&m_BackBuffers[i]));
+
+			m_Device->CreateRenderTargetView(m_BackBuffers[i].Get(), nullptr, rtvHandle);
+
+			rtvHandle.Offset(m_RTVDescriptorSize);
+		}
 	}
 
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> D3D12Context::GetAdapter(bool useWarp)
@@ -188,25 +192,27 @@ namespace Sign {
 
 	void D3D12Context::ResizeDepthBuffer(int width, int height)
 	{
-		FlushCommandQueue();
 		width = (std::max)(1, width);
 		height = (std::max)(1, height);
 
-		D3D12_CLEAR_VALUE optimizedClearValue = {};
-		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-		optimizedClearValue.DepthStencil = { 1.0f,0 };
+		if (!m_DepthBuffer || width > m_Width || height > m_Height) {
+			if (m_DepthBuffer) m_DepthBuffer.Reset();
+			D3D12_CLEAR_VALUE optimizedClearValue = {};
+			optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+			optimizedClearValue.DepthStencil = { 1.0f,0 };
 
-		auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width, height, 1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+			auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width, height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
-		m_Device->CreateCommittedResource(
-			&heapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDesc,
-			D3D12_RESOURCE_STATE_DEPTH_WRITE,
-			&optimizedClearValue,
-			IID_PPV_ARGS(&m_DepthBuffer)
-		);
+			m_Device->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_DEPTH_WRITE,
+				&optimizedClearValue,
+				IID_PPV_ARGS(&m_DepthBuffer)
+			);
+		}
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
 		dsv.Format = DXGI_FORMAT_D32_FLOAT;
@@ -215,6 +221,22 @@ namespace Sign {
 		dsv.Flags = D3D12_DSV_FLAG_NONE;
 
 		m_Device->CreateDepthStencilView(m_DepthBuffer.Get(), &dsv, m_DSVHeap->GetCPUDescriptorHandleForHeapStart());
+	}
+
+	void D3D12Context::ResizeSwapBuffer(uint32_t width, uint32_t height)
+	{
+
+		for (size_t i = 0; i < D3D12Utils::g_NumFrames; i++) {
+			m_BackBuffers[i].Reset();
+			m_FrameFenceValues[i] = m_FrameFenceValues[m_CurrentBackBufferIndex];
+		}
+
+		DXGI_SWAP_CHAIN_DESC swapDesc = {};
+		m_SwapChain->GetDesc(&swapDesc);
+		m_SwapChain->ResizeBuffers(D3D12Utils::g_NumFrames, width, height, swapDesc.BufferDesc.Format, swapDesc.Flags);
+
+		m_CurrentBackBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
+		UpdateRenderTargetViews();
 	}
 
 	void D3D12Context::SetFrameFenceValues(uint64_t fenceValue)

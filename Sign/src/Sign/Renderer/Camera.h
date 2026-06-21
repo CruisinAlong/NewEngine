@@ -1,17 +1,17 @@
 #pragma once
-#include <DirectXMath.h>
+#include "Sign/Math/SignMath.h"
 namespace Sign {
 	class Camera
 	{
 	public:
 		Camera() = default;
-		Camera(const DirectX::XMMATRIX& projectionMatrix) : m_ProjectionMatrix(projectionMatrix) {}
+		Camera(const Mat4& projectionMatrix) : m_ProjectionMatrix(projectionMatrix) {}
 		virtual ~Camera() = default;
 
-		const DirectX::XMMATRIX& GetProjectionMatrix() const {return m_ProjectionMatrix;}
+		const Mat4& GetProjectionMatrix() const {return m_ProjectionMatrix;}
 
 	protected:
-		DirectX::XMMATRIX m_ProjectionMatrix = DirectX::XMMatrixIdentity();
+		Mat4 m_ProjectionMatrix = Mat4::identity();
 	};
 }
 

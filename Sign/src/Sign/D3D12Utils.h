@@ -10,11 +10,11 @@
 namespace D3D12Utils {
 	const uint8_t g_NumFrames = 3;
 
-	static const D3D12_HEAP_PROPERTIES UploadHeapProps = {
+	inline const D3D12_HEAP_PROPERTIES UploadHeapProps = {
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 0,0
 	};
 
-	static bool checkTearingSupport()
+	inline bool checkTearingSupport()
 	{
 		BOOL allowTearing = FALSE;
 		Microsoft::WRL::ComPtr<IDXGIFactory4> factory4;
@@ -31,7 +31,7 @@ namespace D3D12Utils {
 		return allowTearing == TRUE;
 	}
 	//Swap Chain Helper Function
-	static Microsoft::WRL::ComPtr<IDXGISwapChain4> CreateSwapChain(HWND hWnd, Microsoft::WRL::ComPtr<IDXGIFactory4> factory, Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, uint32_t width, uint32_t height, uint32_t bufferCount)
+	inline Microsoft::WRL::ComPtr<IDXGISwapChain4> CreateSwapChain(HWND hWnd, Microsoft::WRL::ComPtr<IDXGIFactory4> factory, Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, uint32_t width, uint32_t height, uint32_t bufferCount)
 	{
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> m_dxgiSwapChain4;
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> m_dxgiSwapChain1;
@@ -59,7 +59,7 @@ namespace D3D12Utils {
 
 
 
-	static Microsoft::WRL::ComPtr<ID3D12Fence> CreateFence(Microsoft::WRL::ComPtr<ID3D12Device2> device)
+	inline Microsoft::WRL::ComPtr<ID3D12Fence> CreateFence(Microsoft::WRL::ComPtr<ID3D12Device2> device)
 	{
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence;
 
@@ -68,7 +68,7 @@ namespace D3D12Utils {
 		return m_Fence;
 	}
 
-	static HANDLE CreateEventHandle()
+	inline HANDLE CreateEventHandle()
 	{
 		HANDLE fenceEvent;
 
@@ -79,7 +79,7 @@ namespace D3D12Utils {
 		return fenceEvent;
 	}
 
-	static uint64_t Signal(Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, Microsoft::WRL::ComPtr<ID3D12Fence> fence, uint64_t& fenceValue)
+	inline uint64_t Signal(Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, Microsoft::WRL::ComPtr<ID3D12Fence> fence, uint64_t& fenceValue)
 	{
 		uint64_t fenceValueForSignal = fenceValue++;
 
@@ -88,7 +88,7 @@ namespace D3D12Utils {
 		return fenceValueForSignal;
 	}
 
-	static void WaitForFenceValue(Microsoft::WRL::ComPtr<ID3D12Fence> fence, uint64_t fenceValue, HANDLE fenceEvent, std::chrono::milliseconds duration = (std::chrono::milliseconds::max)())
+	inline void WaitForFenceValue(Microsoft::WRL::ComPtr<ID3D12Fence> fence, uint64_t fenceValue, HANDLE fenceEvent, std::chrono::milliseconds duration = (std::chrono::milliseconds::max)())
 	{
 		if (fence->GetCompletedValue() < fenceValue)
 		{
@@ -98,7 +98,7 @@ namespace D3D12Utils {
 		}
 	}
 
-	static void Flush(Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, Microsoft::WRL::ComPtr<ID3D12Fence> fence, uint64_t& fenceValue, HANDLE fenceEvent)
+	inline void Flush(Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue, Microsoft::WRL::ComPtr<ID3D12Fence> fence, uint64_t& fenceValue, HANDLE fenceEvent)
 	{
 		uint64_t fenceValueForSignal = Signal(commandQueue, fence, fenceValue);
 
@@ -106,7 +106,7 @@ namespace D3D12Utils {
 	}
 
 
-	static Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(Microsoft::WRL::ComPtr<ID3D12Device2> device, D3D12_COMMAND_LIST_TYPE type)
+	inline Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(Microsoft::WRL::ComPtr<ID3D12Device2> device, D3D12_COMMAND_LIST_TYPE type)
 	{
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_commandAllocator;
 
@@ -115,7 +115,7 @@ namespace D3D12Utils {
 		return m_commandAllocator;
 	}
 
-	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> CreateCommandList(Microsoft::WRL::ComPtr<ID3D12Device2> device, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator, D3D12_COMMAND_LIST_TYPE type)
+	inline Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> CreateCommandList(Microsoft::WRL::ComPtr<ID3D12Device2> device, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator, D3D12_COMMAND_LIST_TYPE type)
 	{
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> m_commandList;
 
@@ -125,7 +125,7 @@ namespace D3D12Utils {
 		return m_commandList;
 	}
 
-	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device2> device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors, bool isShaderVisible)
+	inline Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device2> device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors, bool isShaderVisible)
 	{
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 		
@@ -149,7 +149,7 @@ namespace D3D12Utils {
 		return descriptorHeap;
 	}
 
-	static void TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList, Microsoft::WRL::ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState)
+	inline void TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList, Microsoft::WRL::ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState)
 	{
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 			resource.Get(),
@@ -158,7 +158,7 @@ namespace D3D12Utils {
 		commandList->ResourceBarrier(1, &barrier);
 	}
 
-	static void UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device2> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
+	inline void UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device2> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
 		ID3D12Resource** pDestinationResource, ID3D12Resource** pIntermediateResource,
 		size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE)
 	{
@@ -200,7 +200,7 @@ namespace D3D12Utils {
 		}
 	}
 	
-	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(Microsoft::WRL::ComPtr<ID3D12Device2> device
+	inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(Microsoft::WRL::ComPtr<ID3D12Device2> device
 		,uint64_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initState, const D3D12_HEAP_PROPERTIES& heapProps )
 	{
 		Microsoft::WRL::ComPtr<ID3D12Resource> bufferResource;

@@ -2,9 +2,9 @@
 
 namespace Sign {
 	Mesh::Mesh(const void* vertices, uint32_t vertexCount, const WORD* indices, uint32_t indexCount,
-		const DirectX::XMFLOAT3& translation,
-		const DirectX::XMFLOAT3& scale,
-		const DirectX::XMFLOAT4& rotation)
+		const Vector3D& translation,
+		const Vector3D& scale,
+		const Vector3D& rotation)
 	{
 		m_VertexArray = std::make_shared<VertexArray>();
 		m_Translation = translation;
@@ -22,9 +22,10 @@ namespace Sign {
 	}
 	void Mesh::RecalculateTransform()
 	{
-		auto translation = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&m_Translation));
-		auto scale = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&m_Scale));
-		auto rotation = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&m_Rotation));
-		m_Transform =  scale * rotation * translation;
+		m_Transform = Mat4::scale(m_Scale)
+			* Mat4::rotateX(m_Rotation.x)
+			* Mat4::rotateY(m_Rotation.y)
+			* Mat4::rotateZ(m_Rotation.z)
+			* Mat4::translate(m_Translation);
 	}
 }

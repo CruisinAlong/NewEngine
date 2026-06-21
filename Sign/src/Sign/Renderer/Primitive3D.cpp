@@ -2,7 +2,7 @@
 
 namespace Sign {
 	namespace Primitive {
-		std::shared_ptr<Mesh> Cube3D::Create(const DirectX::XMFLOAT3& translation, const DirectX::XMFLOAT3& scale, const DirectX::XMFLOAT4& rotation, const std::array<DirectX::XMFLOAT3, 8>& color)
+		std::shared_ptr<Mesh> Cube3D::Create(const Vector3D& translation, const Vector3D& scale, const Vector3D& rotation, const std::array<Vector3D, 8>& color)
 		{
 			VertexPosColor CubeVertices[8];
 
@@ -14,11 +14,11 @@ namespace Sign {
 			return std::make_shared<Mesh>(CubeVertices,_countof(CubeVertices),cubeIndices,_countof(cubeIndices),translation,scale,rotation);
 		}
 
-		std::shared_ptr<Mesh> Sphere::Create(const DirectX::XMFLOAT3& translation, const DirectX::XMFLOAT3& scale, const DirectX::XMFLOAT4& rotation, const std::array<DirectX::XMFLOAT3, 8>& color)
+		std::shared_ptr<Mesh> Sphere::Create(const Vector3D& translation, const Vector3D& scale, const Vector3D& rotation, const std::array<Vector3D, 8>& color)
 		{
 			return std::shared_ptr<Mesh>();
 		}
-		std::shared_ptr<Mesh> Plane::Create(const DirectX::XMFLOAT3& translation, const DirectX::XMFLOAT3& scale, const DirectX::XMFLOAT4& rotation, const std::array<DirectX::XMFLOAT3, 4>& color)
+		std::shared_ptr<Mesh> Plane::Create(const Vector3D& translation, const Vector3D& scale, const Vector3D& rotation, const std::array<Vector3D, 4>& color)
 		{
 			VertexPosColor planeVertices[4];
 

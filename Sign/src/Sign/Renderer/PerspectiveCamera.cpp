@@ -12,48 +12,42 @@ namespace Sign {
 		
 
 		if (Input::IsMouseButtonPressed(Mouse::LeftButton)) {
-			const DirectX::XMFLOAT2& mouse = { Input::GetMouseX(), Input::GetMouseY() };
+			const Vector2D& mouse = { Input::GetMouseX(), Input::GetMouseY() };
 			float deltaMouseX = mouse.x - m_InitialMousePosition.x;
 			float deltaMouseY = mouse.y - m_InitialMousePosition.y;
 			m_InitialMousePosition = mouse;
 			m_Yaw += deltaMouseX * RotationSpeed() * ts;
 			m_Pitch += deltaMouseY * RotationSpeed() * ts;
 
-			m_Pitch = std::clamp(m_Pitch, DirectX::XMConvertToRadians(-89.5), DirectX::XMConvertToRadians(89.5));
+			m_Pitch = std::clamp(m_Pitch, MathUtils::ConvertToRadians(-89.5), MathUtils::ConvertToRadians(89.5));
 		}
 		else {
 			m_InitialMousePosition = { Input::GetMouseX(), Input::GetMouseY() };
 		}
 
-		DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&m_Position);
+		Vector3D pos = m_Position;
 
 		if (Input::IsKeyPressed(Key::W)) {
 			auto forwardDir = GetForwardDirection();
-			DirectX::XMVECTOR forwardVec = DirectX::XMLoadFloat3(&forwardDir);
-			pos = DirectX::XMVectorAdd(pos, DirectX::XMVectorScale(forwardVec, MoveSpeed() * ts));
+			pos += forwardDir * MoveSpeed() * ts;
 		}
 		else if (Input::IsKeyPressed(Key::A)) {
 			auto rightDir = GetRightDirection();
-			DirectX::XMVECTOR rightVec = DirectX::XMLoadFloat3(&rightDir);
-			pos = DirectX::XMVectorAdd(pos, DirectX::XMVectorScale(rightVec, -MoveSpeed() * ts));
-			DirectX::XMFLOAT3 debug;
-			DirectX::XMStoreFloat3(&debug, pos);
-			std::println("{} {} {}", debug.x, debug.y, debug.z);
+			pos += rightDir * -MoveSpeed() * ts;
+
+			std::println("{} {} {}", pos.x, pos.y, pos.z);
 		}
 		else if (Input::IsKeyPressed(Key::S)) {
 			auto forwardDir = GetForwardDirection();
-			DirectX::XMVECTOR forwardVec = DirectX::XMLoadFloat3(&forwardDir);
-			pos = DirectX::XMVectorAdd(pos, DirectX::XMVectorScale(forwardVec, -MoveSpeed() * ts));
+			pos += forwardDir * -MoveSpeed() * ts;
 		}
 		else if (Input::IsKeyPressed(Key::D)) {
 			auto rightDir = GetRightDirection();
-			DirectX::XMVECTOR rightVec = DirectX::XMLoadFloat3(&rightDir);
-			pos = DirectX::XMVectorAdd(pos, DirectX::XMVectorScale(rightVec, MoveSpeed() * ts));
-			DirectX::XMFLOAT3 debug;
-			DirectX::XMStoreFloat3(&debug, pos);
-			std::println("{} {} {}", debug.x, debug.y, debug.z);
+			pos += rightDir * MoveSpeed() * ts;
+			
+			std::println("{} {} {}", pos.x, pos.y, pos.z);
 		}
-		DirectX::XMStoreFloat3(&m_Position, pos);
+		m_Position = pos;
 		//std::println("CameraPos: {} {}", m_Position.x, m_Position.y);
 		RecalculateView();
 	}
@@ -77,55 +71,47 @@ namespace Sign {
 		m_AspectRatio = (float)width / (float)height;
 		RecalculateProjection();
 	}
-	DirectX::XMFLOAT3 PerspectiveCamera::GetForwardDirection() const
+	Vector3D PerspectiveCamera::GetForwardDirection() const
 	{
-		auto upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), GetOrientation());
+		auto forwardDir = GetOrientation().rotate(Vector3D(0.0f, 0.0f, 1.0f));
 
-		DirectX::XMFLOAT3 result;
-		DirectX::XMStoreFloat3(&result, upDir);
-		return result;
+		return forwardDir;
 	}
-	DirectX::XMFLOAT3 PerspectiveCamera::GetRightDirection() const
+	Vector3D PerspectiveCamera::GetRightDirection() const
 	{
-		auto upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), GetOrientation());
+		auto rightDir = GetOrientation().rotate(Vector3D(1.0f, 0.0f, 0.0f));
 
-		DirectX::XMFLOAT3 result;
-		DirectX::XMStoreFloat3(&result, upDir);
-		return result;
+		return rightDir;
 	}
-	DirectX::XMFLOAT3 PerspectiveCamera::GetUpDirection() const
+	Vector3D PerspectiveCamera::GetUpDirection() const
 	{
-		auto upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), GetOrientation());
+		auto upDir = GetOrientation().rotate(Vector3D(0.0f,1.0f,0.0f));
 
-		DirectX::XMFLOAT3 result;
-		DirectX::XMStoreFloat3(&result, upDir);
-		return result;
+		return upDir;
 	}
-	DirectX::XMFLOAT3 PerspectiveCamera::GetPosition() const
+	Vector3D PerspectiveCamera::GetPosition() const
 	{
-		return DirectX::XMFLOAT3();
+		return Vector3D();
 	}
-	DirectX::XMVECTOR PerspectiveCamera::GetOrientation() const
+	Quaternion PerspectiveCamera::GetOrientation() const
 	{
-		return DirectX::XMQuaternionRotationRollPitchYaw(m_Pitch, m_Yaw, 0.0f);
+		return Quaternion::QuaternionRotationPitchYawRoll(m_Pitch, m_Yaw, 0.0f);
 	}
 	void PerspectiveCamera::RecalculateProjection()
 	{
 		if (m_AspectRatio == 0.0f)
 			return;
-		m_ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(m_PerspectiveFOV, m_AspectRatio, m_PerspectiveNearClip, m_PerspectiveFarClip);
+		m_ProjectionMatrix = Mat4::perspectiveFovLH(m_PerspectiveFOV, m_AspectRatio, m_PerspectiveNearClip, m_PerspectiveFarClip);
 	}
 	void PerspectiveCamera::RecalculateView()
 	{
-		DirectX::XMVECTOR eyePos = DirectX::XMLoadFloat3(&m_Position);
+		Vector3D eyePos = m_Position;
 
 		auto forwardDir = GetForwardDirection();
 		auto upDir = GetUpDirection();
-		DirectX::XMVECTOR forwardVec = DirectX::XMLoadFloat3(&forwardDir);
-		DirectX::XMVECTOR target = DirectX::XMVectorAdd(eyePos, forwardVec);
+		Vector3D target = eyePos + forwardDir;
 
-		DirectX::XMVECTOR upVec = DirectX::XMLoadFloat3(&upDir);
-		m_ViewMatrix = DirectX::XMMatrixLookAtLH(eyePos, target, upVec);
+		m_ViewMatrix = Mat4::lookAtLH(eyePos, target, upDir);
 	}
 
 	float PerspectiveCamera::MoveSpeed()

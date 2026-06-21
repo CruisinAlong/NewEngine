@@ -57,6 +57,7 @@ namespace Sign {
 		HINSTANCE m_InstanceHandle = nullptr;
 
 		bool m_ShouldClose;
+		bool m_PendingResize = false;
 	};
 }
 

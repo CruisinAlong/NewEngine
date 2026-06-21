@@ -1,11 +1,11 @@
 #pragma once
 #include <directx/d3d12.h>
-#include <DirectXMath.h>
+#include "Sign/Math/SignMath.h"
 
 struct VertexPosColor
 {
-	DirectX::XMFLOAT3 Position;
-	DirectX::XMFLOAT3 Color;
+	Sign::Vector3D Position;
+	Sign::Vector3D Color;
 };
 
 //Indices

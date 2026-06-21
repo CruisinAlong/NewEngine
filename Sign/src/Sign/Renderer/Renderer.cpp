@@ -15,16 +15,16 @@ namespace Sign
 	{
 		s_Context = context;
 		s_CommandList = s_Context->GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandList();
-		SetViewPort(0, 0, 1280, 720);
+		SetViewPort(0, 0, s_Context->GetWidth(), s_Context->GetHeight());
 
 		m_CameraConstantBuffer = std::make_unique<ConstantBuffer>(sizeof(CameraData), 0);
 	}
 
 	void Renderer::ShutDown()
 	{
-		std::println("Renderer Shutdown");
-		
 		s_Context->FlushCommandQueue();
+		std::println("Renderer Shutdown");
+
 	}
 
 	void Renderer::BeginScene(FLOAT* clearColor, const PerspectiveCamera& camera)
@@ -49,13 +49,13 @@ namespace Sign
 
 		}
 
-		m_CameraData.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-		m_CameraData.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
+		m_CameraData.viewMatrix = Mat4::transpose(camera.GetViewMatrix());
+		m_CameraData.projectionMatrix = Mat4::transpose(camera.GetProjectionMatrix());
 		m_CameraConstantBuffer->setData(&m_CameraData, sizeof(CameraData));
 		
 	}
 
-	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Pipeline& pipeline, const DirectX::XMMATRIX& translation)
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Pipeline& pipeline, const Mat4& translation)
 	{
 		pipeline.Bind(s_CommandList.Get()); 
 		ID3D12DescriptorHeap* heaps[] = { s_Context->Get_CBV_SRV_UAV_DescriptorHeap().Get()};
@@ -64,8 +64,8 @@ namespace Sign
 
 		s_CommandList->SetGraphicsRootDescriptorTable(0, s_Context->GetGPUHandleAt(0));
 
-		auto model = DirectX::XMMatrixTranspose(translation);
-		s_CommandList->SetGraphicsRoot32BitConstants(1, sizeof(DirectX::XMMATRIX) / 4, &model, 0);
+		auto model = Mat4::transpose(translation);
+		s_CommandList->SetGraphicsRoot32BitConstants(1, sizeof(Mat4) / 4, &model, 0);
 
 		vertexArray->Bind(s_CommandList);
 
@@ -104,13 +104,17 @@ namespace Sign
 		auto fenceValue = s_Context->GetCommandQueue()->ExecuteCommandList(s_CommandList);
 		s_Context->GetCommandQueue()->WaitForFenceValue(fenceValue);
 	}
-	void Renderer::ResizeDepthbuffer(int width, int height)
+	void Renderer::Resizebuffers(int width, int height)
 	{
+		s_Context->FlushCommandQueue();
+		s_Context->ResizeSwapBuffer(width, height);
 		s_Context->ResizeDepthBuffer(width, height);
 	}
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
+		if (!s_Context) return;
 		SetViewPort(0, 0, width, height);
-		ResizeDepthbuffer(width, height);
+		
+		Resizebuffers(width, height);
 	}
 }

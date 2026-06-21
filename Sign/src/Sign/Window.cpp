@@ -51,12 +51,10 @@ namespace Sign {
 		if (!m_WindowsHandle)
 			assert(false && "Failed to create Window Handle!");
 
-		::SetWindowLongPtr(m_WindowsHandle, GWLP_USERDATA, (LONG_PTR)this);
-
 		m_Context = std::make_unique<D3D12Context>(m_WindowsHandle,m_WindowsSpecification.Width,m_WindowsSpecification.Height);
 		m_Context->Init();
 
-		
+		::SetWindowLongPtr(m_WindowsHandle, GWLP_USERDATA, (LONG_PTR)this);
 		::ShowWindow(m_WindowsHandle, SW_SHOW);
 		::UpdateWindow(m_WindowsHandle);
 	}
@@ -120,7 +118,7 @@ namespace Sign {
 		{
 			bool isRepeat = (lparam & 0x40000000);
 			KeyPressedEvent e((int)wparam, isRepeat);
-			std::println("WParam: {}", wparam);
+			
 			window->m_WindowsSpecification.EventCallback(e);
 			break;
 		}
@@ -130,18 +128,28 @@ namespace Sign {
 			window->m_WindowsSpecification.EventCallback(e);
 			break;
 		}
+
 		case WM_SIZE:
 		{
 			uint32_t width = LOWORD(lparam);
 			uint32_t height = HIWORD(lparam);
 
 			if (window && window->m_Context) {
-				WindowResizedEvent e(width, height);
-				window->m_WindowsSpecification.EventCallback(e);
+				window->m_WindowsSpecification.Width = width;
+				window->m_WindowsSpecification.Height = height;
+				window->m_PendingResize = true;
 			}
 			break;
 		}
-
+		case WM_EXITSIZEMOVE:  // fires ONCE when user releases the window edge
+		{
+			if (window && window->m_PendingResize) {
+				WindowResizedEvent e(window->m_WindowsSpecification.Width, window->m_WindowsSpecification.Height);
+				window->m_WindowsSpecification.EventCallback(e);
+				window->m_PendingResize = false;
+			}
+			break;
+		}
 		case WM_MBUTTONDOWN:
 		{
 			MouseButtonPressedEvent e((int)wparam);

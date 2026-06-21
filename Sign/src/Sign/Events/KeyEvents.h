@@ -39,7 +39,7 @@ namespace Sign {
 
 		std::string ToString() const override
 		{
-			return std::format("KeyPressedEvent: {})", m_KeyCode);
+			return std::format("KeyReleasedEvent: {})", m_KeyCode);
 		}
 
 		EVENT_CLASS_TYPE(KeyReleased)

@@ -3,16 +3,14 @@
 #include <string>
 #include <ranges>
 #include <print>
+
 #include <directx/d3d12.h>
 #include <wrl.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
-#include <DirectXMath.h>
 #include <directx/d3d12sdklayers.h>
-#include <iostream>
-#include <chrono>
+
 #include "Window.h"
-#include "Layer.h"
 #include "LayerStack.h"
 #include "Events/Event.h"
 #include "Events/WindowEvents.h"

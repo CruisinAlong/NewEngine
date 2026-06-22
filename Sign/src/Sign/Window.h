@@ -5,8 +5,8 @@
 #include <print>
 
 #include <directx/d3d12.h>
-#include <DirectXMath.h>
 
+#include "Sign/Math/Vector2D.h"
 #include "Events/Event.h"
 #include "Events/WindowEvents.h"
 #include "Events/KeyEvents.h"
@@ -37,8 +37,8 @@ namespace Sign {
 		void Update();
 		void PollEvents();
 
-		DirectX::XMFLOAT2 GetFrameBufferSize() const;
-		DirectX::XMFLOAT2 GetMousePos() const;
+		Vector2D GetFrameBufferSize() const;
+		Vector2D GetMousePos() const;
 
 		inline unsigned int GetWidth() const { return m_WindowsSpecification.Width; }
 		inline unsigned int GetHeight() const { return m_WindowsSpecification.Height; }

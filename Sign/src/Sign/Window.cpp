@@ -86,13 +86,20 @@ namespace Sign {
 		}
 	}
 	
-	DirectX::XMFLOAT2 Window::GetFrameBufferSize() const
+	Vector2D Window::GetFrameBufferSize() const
 	{
-		return DirectX::XMFLOAT2();
+		RECT clientRect;
+		if (GetClientRect(m_WindowsHandle, &clientRect)) {
+			float width = static_cast<float>(clientRect.right - clientRect.left);
+			float height = static_cast<float>(clientRect.bottom - clientRect.top);
+
+			return Vector2D(width, height);
+		}
+		return Vector2D(0.0f,0.0f);
 	}
-	DirectX::XMFLOAT2 Window::GetMousePos() const
+	Vector2D Window::GetMousePos() const
 	{
-		return DirectX::XMFLOAT2();
+		return Vector2D();
 	}
 	bool Window::ShouldClose()
 	{

@@ -28,7 +28,7 @@ namespace Sign {
 		m_Window = std::make_unique<Window>(m_Specifications.WindowSpec);
 		m_Window->Create();
 		Renderer::Init(m_Window->GetContext());
-		Renderer::Resizebuffers(m_Window->GetContext()->GetWidth(), m_Window->GetContext()->GetHeight());
+		Renderer::Resizebuffers(m_Window->GetFrameBufferSize().x, m_Window->GetFrameBufferSize().y);
 
 
 	}

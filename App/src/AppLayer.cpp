@@ -69,7 +69,7 @@ void AppLayer::OnAttach()
 		{ 1.0f, 1.0f, 1.0f },
 		{ 1.0f, 0.0f, 1.0f }
 		} });
-		Cube->SetTranslation({ get_random_int(-5.0f,5.0f),get_random_int(-5.0f,5.0f) ,get_random_int(-5.0f,5.0f) });
+		Cube->SetTranslation({ MathUtils::Random_Float(-5.0f,5.0f),MathUtils::Random_Float(-5.0f,5.0f) ,MathUtils::Random_Float(-5.0f,5.0f) });
 		m_Meshes.push_back(Cube);
 	}
 
@@ -77,14 +77,7 @@ void AppLayer::OnAttach()
 	Sign::Renderer::CPUSyncToGPU();
 	//Sign::Renderer::Resizebuffers(Sign::Application::Get().GetWindow().GetWidth(), Sign::Application::Get().GetWindow().GetHeight());
 }
-float AppLayer::get_random_int(float min, float max) {
-	// 'static' means these initialize exactly ONCE, not every frame
-	static std::random_device rd;
-	static std::mt19937 gen(rd());
 
-	std::uniform_real_distribution<float> distrib(min, max);
-	return distrib(gen);
-}
 void AppLayer::OnUpdate(float ts)
 {
 	if (Sign::Input::IsKeyPressed(Sign::Key::A)) {

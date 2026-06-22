@@ -1,5 +1,5 @@
 #pragma once
-#include "Sign/Application.h"
+/*#include "Sign/Application.h"
 #include "Sign/Layer.h"
 #include <iostream>
 #include <random>
@@ -19,7 +19,9 @@
 #include "Sign/Renderer/Pipeline.h"
 #include "Sign/Renderer/PerspectiveCamera.h"
 #include "Sign/Renderer/Primitive3D.h"
-#include "Sign/Math/SignMath.h"
+#include "Sign/Math/SignMath.h"*/
+
+#include <Sign.h>
 
 
 class AppLayer : public Sign::Layer
@@ -30,7 +32,7 @@ public:
 	virtual void OnUpdate(float ts) override;
 	virtual void OnEvent(Sign::Event& event) override;
 	virtual void OnRender() override;
-	float get_random_int(float min, float max);
+
 	bool OnWindowResizedEvent(Sign::WindowResizedEvent& e);
 	bool OnKeyPressedEvent(Sign::KeyPressedEvent& e);
 

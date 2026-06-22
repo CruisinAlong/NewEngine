@@ -16,6 +16,7 @@ namespace Sign {
 	struct CameraData {
 		Mat4 viewMatrix;
 		Mat4 projectionMatrix;
+		float time;
 	};
 	class Renderer
 	{
@@ -32,14 +33,14 @@ namespace Sign {
 		static void CPUSyncToGPU();
 		static void Resizebuffers(int width, int height);
 
-		static D3D12Context* s_Context;
-		static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> s_CommandList;
+		static D3D12Context*										s_Context;
+		static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>	s_CommandList;
 
 	private:
-		static D3D12_VIEWPORT      s_Viewport;
-		static D3D12_RECT          s_ScissorsRect;
-		static std::shared_ptr<ConstantBuffer> m_CameraConstantBuffer;
-		static CameraData m_CameraData;
+		static D3D12_VIEWPORT					s_Viewport;
+		static D3D12_RECT						s_ScissorsRect;
+		static std::shared_ptr<ConstantBuffer>	m_CameraConstantBuffer;
+		static CameraData						m_CameraData;
 	};
 }
 

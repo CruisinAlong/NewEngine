@@ -22,7 +22,7 @@ void AppLayer::OnAttach()
 	pSpecs.DepthTest = TRUE;
 	pSpecs.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
-	m_GraphicsPipeline = std::make_unique<Sign::GraphicsPipeline>(Sign::Renderer::s_Context->GetDevice(), pSpecs);
+	m_GraphicsPipeline = std::make_unique<Sign::GraphicsPipeline>(Sign::Renderer::GetContext()->GetDevice(), pSpecs);
 
 	VertexPosColor triangleVertices[3] =
 	{
@@ -42,44 +42,32 @@ void AppLayer::OnAttach()
 	m_VertexArray->SetIndexBuffer(triangleIB);
 
 
-	auto Cube = Sign::Primitive::Cube3D::Create({ 0.0f,0.0f,1.f }, { 0.5f,0.5f,0.5f }, { 0.0f, 0.0f, 0.0f }, {
-		{{ 0.0f, 1.0f, 0.0f },
-		{ 1.0f, 1.0f, 0.0f },
-		{ 1.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 1.0f }
-		} });
-	auto Cube2 = Sign::Primitive::Cube3D::Create();
+/*	auto Cube = std::make_shared<Sign::CubeEntity>();
+	Cube->SetScale(Sign::Vector3D(0.5f, 0.5f, 0.5f));
+	auto Cube2 = std::make_shared<Sign::CubeEntity>();
 	Cube2->SetTranslation({ 0.0f,0.0f,10.0f });
+	Cube2->SetScale(Sign::Vector3D(0.5f, 0.5f, 0.5f));*/
 
-	auto plane = Sign::Primitive::Plane::Create();
-	m_Meshes.push_back(Cube);
-	m_Meshes.push_back(Cube2);
+	auto plane = std::make_shared<Sign::PlaneEntity>();
+
+	//auto circle = std::make_shared<Sign::CircleEntity>();
+	//m_Meshes.push_back(circle);
+	//m_Meshes.push_back(Cube);
+	//m_Meshes.push_back(Cube2);
 	m_Meshes.push_back(plane);
-
-	for (int i = 0; i < 100; i++) {
-		auto Cube = Sign::Primitive::Cube3D::Create({ 0.0f,0.0f,0.f }, { 0.5f,0.5f,0.5f }, { 0.0f, 0.0f, 0.0f }, {
-		{{ 0.0f, 1.0f, 0.0f },
-		{ 1.0f, 1.0f, 0.0f },
-		{ 1.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 1.0f }
-		} });
-		Cube->SetTranslation({ MathUtils::Random_Float(-5.0f,5.0f),MathUtils::Random_Float(-5.0f,5.0f) ,MathUtils::Random_Float(-5.0f,5.0f) });
+	m_InitialEntityCount++;
+	/*for (int i = 0; i < 100; i++) {
+		auto Cube = std::make_shared<Sign::CubeEntity>();
+		Cube->SetTranslation({ MathUtils::Random_Float(-15.0f,15.0f),MathUtils::Random_Float(-15.0f,15.0f) ,MathUtils::Random_Float(-15.0f,15.0f) });
+		Cube->SetScale(Sign::Vector3D(0.5f, 0.5f, 0.5f));
 		m_Meshes.push_back(Cube);
-	}
-
-
-	Sign::Renderer::CPUSyncToGPU();
-	//Sign::Renderer::Resizebuffers(Sign::Application::Get().GetWindow().GetWidth(), Sign::Application::Get().GetWindow().GetHeight());
+	}*/
 }
 
-void AppLayer::OnUpdate(float ts)
+void AppLayer::OnUpdate(Sign::Timestep dt)
 {
+	//std::println("Delta Time: {} {}", dt.GetSeconds(), dt.GetMilliseconds());
+
 	if (Sign::Input::IsKeyPressed(Sign::Key::A)) {
 		std::println("A");
 	}
@@ -88,7 +76,7 @@ void AppLayer::OnUpdate(float ts)
 		Sign::Application::Get().Stop();
 	}
 	
-	m_EditorCamera.OnUpdate(ts);
+	m_EditorCamera.OnUpdate(dt);
 	//std::println("{} {}", Sign::Input::GetMouseX(), Sign::Input::GetMouseY());
 }
 
@@ -108,10 +96,21 @@ void AppLayer::OnRender()
 {
 	FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	Sign::Renderer::BeginScene(clearColor, m_EditorCamera);
-	Sign::Renderer::Submit(m_VertexArray, *m_GraphicsPipeline, Sign::Mat4::identity());
-	for (auto& mesh : m_Meshes) {
-		Sign::Renderer::Submit(mesh->GetVertexArray(), *m_GraphicsPipeline, mesh->GetTransform());
+
+	//Need for open commandlist, might have to make a separate func for this
+	for (auto& pending : m_PendingMeshes) {
+		Sign::CreateObjectCommand* command = new Sign::CreateObjectCommand(m_Meshes, Sign::PrimitiveType::Cube);
+		command->Execute();
+		m_EditorHistory.Record(command);
 	}
+	m_PendingMeshes.clear();
+
+	Sign::Renderer::Submit(m_VertexArray, *m_GraphicsPipeline, Sign::Mat4::identity());
+
+	for (auto& mesh : m_Meshes) {
+		Sign::Renderer::Submit(mesh->GetMesh()->GetVertexArray(), *m_GraphicsPipeline, mesh->GetTransform());
+	}
+
 	Sign::Renderer::EndScene();
 }
 
@@ -123,9 +122,37 @@ bool AppLayer::OnWindowResizedEvent(Sign::WindowResizedEvent& e)
 
 bool AppLayer::OnKeyPressedEvent(Sign::KeyPressedEvent& e)
 {
+	if (e.IsRepeated())
+		return false;
 
-	if (e.GetKeyCode() == Sign::Key::Esc) {
-		Sign::Application::Get().Stop();
+	switch (e.GetKeyCode()) 
+	{
+		case Sign::Key::Esc: 
+		{
+			Sign::Application::Get().Stop();
+			break;
+		}
+		case Sign::Key::Spacebar: 
+		{
+			m_PendingMeshes.push_back(Sign::PrimitiveType::Cube);
+			std::println("Entitiy Number: {}", m_Meshes.size());
+			break;
+		}
+		case Sign::Key::Backspace:
+		{
+			Sign::RemoveObjectCommand* command = new Sign::RemoveObjectCommand(m_Meshes);
+			command->Execute();
+			std::println("Entitiy Number: {}", m_Meshes.size());
+			m_EditorHistory.Record(command);
+			break;
+		}
+		case Sign::Key::Delete:
+		{
+			Sign::DeleteAllCommand* command = new Sign::DeleteAllCommand(m_Meshes, m_InitialEntityCount);
+			command->Execute();
+			std::println("Entitiy Number: {}", m_Meshes.size());
+			m_EditorHistory.Record(command);
+		}
 	}
 	return false;
 }

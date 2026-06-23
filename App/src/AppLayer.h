@@ -29,7 +29,7 @@ class AppLayer : public Sign::Layer
 public:
 	AppLayer();
 	virtual void OnAttach() override;
-	virtual void OnUpdate(float ts) override;
+	virtual void OnUpdate(Sign::Timestep dt) override;
 	virtual void OnEvent(Sign::Event& event) override;
 	virtual void OnRender() override;
 
@@ -40,7 +40,10 @@ private:
 	std::shared_ptr<Sign::VertexArray> m_VertexArray;
 	std::unique_ptr<Sign::GraphicsPipeline> m_GraphicsPipeline;
 	std::shared_ptr<Sign::Shader> m_Shader;
-	std::vector<std::shared_ptr<Sign::Mesh>> m_Meshes;
+	std::vector<std::shared_ptr<Sign::Entity>> m_Meshes;
+	std::vector<Sign::PrimitiveType> m_PendingMeshes;
+	int m_InitialEntityCount = 0;
+	Sign::EditorHistory m_EditorHistory;
 
 	Sign::PerspectiveCamera m_EditorCamera;
 };

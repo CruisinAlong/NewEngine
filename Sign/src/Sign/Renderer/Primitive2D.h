@@ -7,31 +7,14 @@
 #include "Sign/Math/SignMath.h"
 namespace Sign {
 	namespace Primitive {
-		static const std::array<Vector3D, 8> cubePosition = { {
+		static const std::array<Vector3D, 8> trianglePosition = { {
 			{-1.0,-1.0,-1.0} , {-1.0,1.0,-1.0 },
 			{ 1.0,1.0,-1.0 } , { 1.0,-1.0,-1.0 },
 			{ -1.0,-1.0,1.0 }, { -1.0,1.0,1.0 },
 			{ 1.0,1.0,1.0 }  , { 1.0,-1.0,1.0 }
 		} };
-		static const std::array<Vector3D, 4> planePosition = { {
-			{-1.0,0.0,1.0 } , 
-			{ 1.0,0.0,1.0 } ,
-			{ 1.0,0.0,-1.0 }, 
-			{ -1.0,0.0,-1.0 }
-		} };
-		struct Cube3D
-		{
-		public:
-			static std::shared_ptr<Mesh> Create(
-				const std::array<Vector3D,8>& color = {{
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f}}}
-				);
-		};
 
-		struct Sphere
+		struct Triangle
 		{
 		public:
 			static std::shared_ptr<Mesh> Create(
@@ -43,13 +26,11 @@ namespace Sign {
 					);
 		};
 
-		struct Plane {
+		struct Circle
+		{
 		public:
 			static std::shared_ptr<Mesh> Create(
-				const std::array<Vector3D, 4>& color = { {
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f}} }
-					);
+				const Vector3D& centerColor, const Vector3D& outerColor);
 		};
 	};
 }

@@ -27,9 +27,10 @@ namespace Sign {
 
 		m_Window = std::make_unique<Window>(m_Specifications.WindowSpec);
 		m_Window->Create();
+
 		Renderer::Init(m_Window->GetContext());
 		Renderer::Resizebuffers(m_Window->GetFrameBufferSize().x, m_Window->GetFrameBufferSize().y);
-
+		Renderer::BeginInitializationCommand();
 
 	}
 	Application::~Application()
@@ -54,18 +55,21 @@ namespace Sign {
 
 	void Application::Run()
 	{
+		Renderer::EndInitializationCommand();
+
 		m_Running = true;
 		while (m_Running) {
 			auto currentTime = std::chrono::steady_clock::now();
-			std::chrono::duration<float>  deltaTime = currentTime - m_LastFrameTime;
+			std::chrono::duration<float>  dt = currentTime - m_LastFrameTime;
+			Timestep deltaTime = dt.count();
+
 			m_LastFrameTime = currentTime;
-			float ts = deltaTime.count();
 
 			m_Window->PollEvents();
 
 
 			for (const auto& layer : m_LayerStack) {
-				layer->OnUpdate(ts);
+				layer->OnUpdate(deltaTime);
 			}
 
 			//If Multi-threaded, implement Rendering in OnUpdate to solve asynchronous problems like race conditions

@@ -15,11 +15,13 @@
 #include "Events/Event.h"
 #include "Events/WindowEvents.h"
 #include "Renderer/Renderer.h"
+#include "Timestep.h"
 
 
 namespace Sign {
 	struct ApplicationSpecifications {
 		std::string name = "Application";
+		float targetFPS = 0.0f;
 		WindowSpecifications WindowSpec;
 	};
 	class Application

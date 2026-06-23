@@ -6,18 +6,16 @@ namespace Sign {
 		SetViewPortSize(width, height);
 	}
 
-	void PerspectiveCamera::OnUpdate(float ts)
+	void PerspectiveCamera::OnUpdate(Timestep dt)
 	{
-
-		
 
 		if (Input::IsMouseButtonPressed(Mouse::LeftButton)) {
 			const Vector2D& mouse = { Input::GetMouseX(), Input::GetMouseY() };
 			float deltaMouseX = mouse.x - m_InitialMousePosition.x;
 			float deltaMouseY = mouse.y - m_InitialMousePosition.y;
 			m_InitialMousePosition = mouse;
-			m_Yaw += deltaMouseX * RotationSpeed() * ts;
-			m_Pitch += deltaMouseY * RotationSpeed() * ts;
+			m_Yaw += deltaMouseX * RotationSpeed() * dt;
+			m_Pitch += deltaMouseY * RotationSpeed() * dt;
 
 			m_Pitch = std::clamp(m_Pitch, MathUtils::ConvertToRadians(-89.5), MathUtils::ConvertToRadians(89.5));
 		}
@@ -29,21 +27,21 @@ namespace Sign {
 
 		if (Input::IsKeyPressed(Key::W)) {
 			auto forwardDir = GetForwardDirection();
-			pos += forwardDir * MoveSpeed() * ts;
+			pos += forwardDir * MoveSpeed() * dt;
 		}
 		else if (Input::IsKeyPressed(Key::A)) {
 			auto rightDir = GetRightDirection();
-			pos += rightDir * -MoveSpeed() * ts;
+			pos += rightDir * -MoveSpeed() * dt;
 
 			std::println("{} {} {}", pos.x, pos.y, pos.z);
 		}
 		else if (Input::IsKeyPressed(Key::S)) {
 			auto forwardDir = GetForwardDirection();
-			pos += forwardDir * -MoveSpeed() * ts;
+			pos += forwardDir * -MoveSpeed() * dt;
 		}
 		else if (Input::IsKeyPressed(Key::D)) {
 			auto rightDir = GetRightDirection();
-			pos += rightDir * MoveSpeed() * ts;
+			pos += rightDir * MoveSpeed() * dt;
 			
 			std::println("{} {} {}", pos.x, pos.y, pos.z);
 		}

@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "Events/Event.h"
+#include "Sign/Timestep.h"
 namespace Sign {
 	class Layer {
 	public:
@@ -11,7 +12,7 @@ namespace Sign {
 		virtual void OnDettach() {}
 
 		virtual void OnEvent(Event& event) {}
-		virtual void OnUpdate(float ts) {}
+		virtual void OnUpdate(Timestep dt) {}
 		virtual void OnRender() {}
 
 		template<std::derived_from<Layer> T, typename... Args>

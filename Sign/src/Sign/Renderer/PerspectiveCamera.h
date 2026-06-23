@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Sign/Events/Event.h"
 #include "Sign/Input.h"
+#include "Sign/Timestep.h"
 #include "Sign/Math/SignMath.h"
 namespace Sign {
 	class PerspectiveCamera : public Camera
@@ -13,7 +14,7 @@ namespace Sign {
 		PerspectiveCamera(uint32_t width, uint32_t height);
 		virtual ~PerspectiveCamera() = default;
 
-		void OnUpdate(float ts);
+		void OnUpdate(Timestep dt);
 		void OnEvent(Event& e);
 
 		void SetPerspective(float perspectiveFOV, float perspectiveNear, float perspectiveFar);

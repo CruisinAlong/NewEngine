@@ -23,6 +23,8 @@ namespace Sign {
 	public:
 		static void Init(D3D12Context* context);
 		static void ShutDown();
+		static void BeginInitializationCommand();
+		static void EndInitializationCommand();
 
 		static void BeginScene(FLOAT* clearColor, const PerspectiveCamera& camera);
 		static void Submit(const std::shared_ptr<VertexArray>& vertexArray, const Pipeline& pipeline, const Mat4& translation);
@@ -33,10 +35,14 @@ namespace Sign {
 		static void CPUSyncToGPU();
 		static void Resizebuffers(int width, int height);
 
-		static D3D12Context*										s_Context;
-		static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>	s_CommandList;
+		static D3D12Context*										GetContext() { return s_Context; }
+		static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>	GetCommandList() { return s_CommandList; }
 
 	private:
+
+		static D3D12Context* s_Context;
+		static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>	s_CommandList;
+
 		static D3D12_VIEWPORT					s_Viewport;
 		static D3D12_RECT						s_ScissorsRect;
 		static std::shared_ptr<ConstantBuffer>	m_CameraConstantBuffer;

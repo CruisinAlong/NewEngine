@@ -14,10 +14,9 @@ namespace Sign
 	void Renderer::Init(D3D12Context* context)
 	{
 		s_Context = context;
-		s_CommandList = s_Context->GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandList();
 		SetViewPort(0, 0, s_Context->GetWidth(), s_Context->GetHeight());
 
-		m_CameraConstantBuffer = std::make_unique<ConstantBuffer>(sizeof(CameraData), 0);
+		m_CameraConstantBuffer = std::make_shared<ConstantBuffer>(sizeof(CameraData), 0);
 	}
 
 	void Renderer::ShutDown()
@@ -25,6 +24,17 @@ namespace Sign
 		s_Context->FlushCommandQueue();
 		std::println("Renderer Shutdown");
 
+	}
+
+	void Renderer::BeginInitializationCommand()
+	{
+		s_CommandList = s_Context->GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandList();
+	}
+
+	void Renderer::EndInitializationCommand()
+	{
+		CPUSyncToGPU();
+		s_CommandList = nullptr;
 	}
 
 	void Renderer::BeginScene(FLOAT* clearColor, const PerspectiveCamera& camera)

@@ -6,8 +6,8 @@ namespace Sign {
 	{
 		m_Size = m_NumElem * sizeof(VertexPosColor);
 		D3D12Utils::UpdateBufferResource(
-			Renderer::s_Context->GetDevice(),
-			Renderer::s_CommandList,
+			Renderer::GetContext()->GetDevice(),
+			Renderer::GetCommandList(),
 			&m_VertexBuffer,
 			&m_intermediateBuffer,
 			m_NumElem,
@@ -15,7 +15,7 @@ namespace Sign {
 			vertices);
 
 		D3D12Utils::TransitionResource(
-			Renderer::s_CommandList,
+			Renderer::GetCommandList(),
 			m_VertexBuffer,
 			D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 

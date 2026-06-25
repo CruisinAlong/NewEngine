@@ -4,7 +4,7 @@
 #include <memory>	
 #include "Sign/D3D12Context.h"
 #include "Sign/D3D12Utils.h"
-#include "Sign/Renderer/Pipeline.h"
+#include "Sign/Shader/Shader.h"
 #include "Sign/Buffers/VertexArray.h"
 #include "Sign/Buffers/ConstantBuffer.h"
 #include "Sign/Renderer/Mesh.h"
@@ -13,7 +13,7 @@
 
 namespace Sign {
 
-	struct CameraData {
+	struct alignas(256) CameraData {
 		Mat4 viewMatrix;
 		Mat4 projectionMatrix;
 		float time;
@@ -27,7 +27,7 @@ namespace Sign {
 		static void EndInitializationCommand();
 
 		static void BeginScene(FLOAT* clearColor, const PerspectiveCamera& camera);
-		static void Submit(const std::shared_ptr<VertexArray>& vertexArray, const Pipeline& pipeline, const Mat4& translation);
+		static void Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform);
 		static void EndScene();
 
 		static void OnWindowResize(uint32_t width, uint32_t height);

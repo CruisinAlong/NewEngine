@@ -38,7 +38,7 @@ public:
 
 private:
 	std::shared_ptr<Sign::VertexArray> m_VertexArray;
-	std::unique_ptr<Sign::GraphicsPipeline> m_GraphicsPipeline;
+
 	std::shared_ptr<Sign::Shader> m_Shader;
 	std::vector<std::shared_ptr<Sign::Entity>> m_Meshes;
 	std::vector<Sign::PrimitiveType> m_PendingMeshes;

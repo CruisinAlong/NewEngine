@@ -1,9 +1,11 @@
 #include "Pipeline.h"
+
+#include "Sign/Renderer/Renderer.h"
 namespace Sign {
-	GraphicsPipeline::GraphicsPipeline(Microsoft::WRL::ComPtr<ID3D12Device2> device, const PipelineSpecifications& specs)
+	GraphicsPipeline::GraphicsPipeline(const PipelineSpecifications& specs)
 	{
-		CreateRootSignature(device);
-		CreatePSO(device, specs);
+		CreateRootSignature(Renderer::GetContext()->GetDevice());
+		CreatePSO(Renderer::GetContext()->GetDevice(), specs);
 	}
 	void GraphicsPipeline::Bind(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList) const
 	{
@@ -33,7 +35,7 @@ namespace Sign {
 
 		rootParameters[0].InitAsDescriptorTable(1, &cbvRange[0], D3D12_SHADER_VISIBILITY_VERTEX);
 
-		rootParameters[1].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+		rootParameters[1].InitAsConstants(sizeof(Mat4) / 4, 1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
@@ -54,8 +56,8 @@ namespace Sign {
 		pipelineStateStream.pRootSignature = m_RootSignature.Get();
 		pipelineStateStream.InputLayout = { specs.InputLayout.data(), (UINT)specs.InputLayout.size() };
 		pipelineStateStream.PrimitiveTopologyType = specs.Topology;
-		pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(specs.Shader->GetVertexShaderBlob().Get());
-		pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(specs.Shader->GetPixelShaderBlob().Get());
+		pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(specs.VertexBlob);
+		pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(specs.PixelBlob);
 
 		auto rasterDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
@@ -77,10 +79,10 @@ namespace Sign {
 	}
 	
 
-	ComputePipeline::ComputePipeline(Microsoft::WRL::ComPtr<ID3D12Device2> device, const PipelineSpecifications& specs)
+	ComputePipeline::ComputePipeline(const PipelineSpecifications& specs)
 	{
-		CreateRootSignature(device);
-		CreatePSO(device, specs);
+		CreateRootSignature(Renderer::GetContext()->GetDevice());
+		CreatePSO(Renderer::GetContext()->GetDevice(), specs);
 	}
 	void ComputePipeline::Bind(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList) const
 	{
@@ -116,7 +118,7 @@ namespace Sign {
 		ComputePipelineStateStream pipelineStateStream = {};
 
 		pipelineStateStream.pRootSignature = m_RootSignature.Get();
-		pipelineStateStream.CS = CD3DX12_SHADER_BYTECODE(specs.Shader->GetComputeShaderBlob().Get());
+		pipelineStateStream.CS = CD3DX12_SHADER_BYTECODE(specs.ComputeBlob);
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc = { sizeof(ComputePipelineStateStream), &pipelineStateStream };
 		device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_PipelineState));

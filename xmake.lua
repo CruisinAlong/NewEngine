@@ -83,7 +83,7 @@ target("App")
 
 	add_headerfiles("App/src/**.h")
 	add_files("App/src/**.cpp")
-	add_extrafiles("App/src/**.hlsl")
+	add_extrafiles("App/src/**.hlsl", {type = "plain"})
 
 	
 	--add_includedirs(
@@ -115,9 +115,11 @@ target("App")
 
 	after_build(function(target)
 		local shaderSrc = path.join(os.projectdir(), "App/src/Shader")
-		local shaderDest = path.join(target:targetdir(), "Shader")
+		local arch = os.arch()
+		local mode = is_mode("debug") and "Debug" or "Release"
+		local shaderDest = path.join(os.projectdir(),"bin",mode.."-"..arch,"App", "Shader")
 		os.mkdir(shaderDest)
-		os.cp(shaderSrc .. "/**.hlsl", shaderDest)
+        os.cp(shaderSrc .. "/**.hlsl", shaderDest)
 	end)
 
 	if is_mode("debug") then

@@ -65,16 +65,16 @@ namespace Sign
 		
 	}
 
-	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Pipeline& pipeline, const Mat4& translation)
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform)
 	{
-		pipeline.Bind(s_CommandList.Get()); 
+		shader.Bind(s_CommandList);
 		ID3D12DescriptorHeap* heaps[] = { s_Context->Get_CBV_SRV_UAV_DescriptorHeap().Get()};
 		s_CommandList->SetDescriptorHeaps(_countof(heaps), heaps);
 		
 
-		s_CommandList->SetGraphicsRootDescriptorTable(0, s_Context->GetGPUHandleAt(0));
+		s_CommandList->SetGraphicsRootDescriptorTable(0, s_Context->GetGPUHandleAt(s_Context->GetCurrentBackBuffer()));
 
-		auto model = Mat4::transpose(translation);
+		auto model = Mat4::transpose(transform);
 		s_CommandList->SetGraphicsRoot32BitConstants(1, sizeof(Mat4) / 4, &model, 0);
 
 		vertexArray->Bind(s_CommandList);

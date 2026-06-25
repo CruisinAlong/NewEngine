@@ -8,6 +8,12 @@ namespace Sign {
 		PlaneEntity();
 
 
+
+		// Inherited via Entity
+		void OnUpdate(Timestep dt) override;
+	private:
+		inline static std::shared_ptr<Mesh> s_DefaultPlaneMesh = nullptr;
+
 	};
 }
 

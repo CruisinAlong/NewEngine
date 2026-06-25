@@ -1,9 +1,13 @@
 #include "Shader.h"
+
+
+
 namespace Sign {
-	Shader::Shader(const WCHAR* vertexSrc, const WCHAR* pixelSrc, const WCHAR* computeSrc) 
+	Shader::Shader(const WCHAR* vertexSrc, const WCHAR* pixelSrc, const WCHAR* computeSrc, const PipelineSpecifications& specs)
 		: m_VertexPath(vertexSrc), m_PixelPath(pixelSrc), m_ComputePath(computeSrc)
 	{
 		Compile();
+		SetGraphicsPipeline(specs);
 	}
 	void Shader::Compile()
 	{
@@ -41,6 +45,20 @@ namespace Sign {
 			assert(false && "Shader Compilation Failed");
 		}
 
+	}
+
+	void Shader::SetGraphicsPipeline(const PipelineSpecifications& spec)
+	{
+		PipelineSpecifications pSpecs = spec;
+		pSpecs.VertexBlob = vertexShaderBlob.Get();
+		pSpecs.PixelBlob = pixelShaderBlob.Get();
+
+		m_GraphicsPipeline = std::make_unique<Sign::GraphicsPipeline>(pSpecs);
+	}
+
+	void Shader::Bind(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>& commandList) const
+	{
+		m_GraphicsPipeline->Bind(commandList);
 	}
 
 	std::filesystem::path Shader::GetExePath()

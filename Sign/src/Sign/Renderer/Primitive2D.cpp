@@ -17,8 +17,8 @@ namespace Sign {
 				float angle = ((float)i / (float)64 * 2.0f * MathUtils::PI);
 
 				VertexPosColor perimeterVertex;
-				perimeterVertex.Position.x = std::cos(angle) * 10.0f;
-				perimeterVertex.Position.y = std::sin(angle) * 10.0f;
+				perimeterVertex.Position.x = std::cos(angle) * 1.0f;
+				perimeterVertex.Position.y = std::sin(angle) * 1.0f;
 				perimeterVertex.Position.z = 0.0f;
 				perimeterVertex.Color = outerColor;
 
@@ -35,8 +35,18 @@ namespace Sign {
 			indices.push_back(64);
 			indices.push_back(1);
 
-
+			std::println("VCount: {} , ICount: {}", vertices.size(), indices.size());
 			return std::make_shared<Mesh>(vertices.data(), (uint32_t)vertices.size(),indices.data(), (uint32_t)indices.size());
+		}
+		std::shared_ptr<Mesh> Triangle::Create(const std::array<Vector3D, 3>& color)
+		{
+			VertexPosColor trianlgeVertices[3];
+
+			for (size_t i = 0; i < 3; i++) {
+				trianlgeVertices[i] = { trianglePosition[i], color[i] };
+			}
+
+			return std::make_shared<Mesh>(trianlgeVertices, _countof(trianlgeVertices), trianlgeIndices, _countof(trianlgeIndices));
 		}
 	}
 }

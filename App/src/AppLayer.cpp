@@ -10,8 +10,8 @@ void AppLayer::OnAttach()
 	m_EditorCamera = Sign::PerspectiveCamera(Sign::Application::Get().GetWindow().GetWidth(), Sign::Application::Get().GetWindow().GetHeight());
 	m_EditorCamera.SetPerspective(MathUtils::ConvertToRadians(45.0f), 0.1f, 1000.0f);
 
-	m_Shader = std::make_shared<Sign::Shader>(L"Shader/VertexShader.hlsl", L"Shader/PixelShader.hlsl");
-	Sign::PipelineSpecifications pSpecs = {};
+	
+	/*Sign::PipelineSpecifications pSpecs = {};
 	pSpecs.Shader = m_Shader;
 	pSpecs.InputLayout = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, };
@@ -22,25 +22,12 @@ void AppLayer::OnAttach()
 	pSpecs.DepthTest = TRUE;
 	pSpecs.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
-	m_GraphicsPipeline = std::make_unique<Sign::GraphicsPipeline>(Sign::Renderer::GetContext()->GetDevice(), pSpecs);
+	m_Shader = std::make_shared<Sign::Shader>(L"Shader/VertexShader.hlsl", L"Shader/PixelShader.hlsl", pSpecs);*/
 
-	VertexPosColor triangleVertices[3] =
-	{
-		{Sign::Vector3D(0.0,0.5,0.0), Sign::Vector3D(1.0,0.0,0.0)},
-		{Sign::Vector3D(0.5,-0.5,0.0), Sign::Vector3D(0.0,1.0,0.0)},
-		{Sign::Vector3D(-0.5,-0.5,0.0), Sign::Vector3D(0.0,0.0,1.0)}
-	};
+	auto triangle = std::make_shared<Sign::TriangleEntity>();
 
-	m_VertexArray = std::make_shared<Sign::VertexArray>();
-
-	std::shared_ptr<Sign::VertexBuffer> triangleVB;
-	std::shared_ptr<Sign::IndexBuffer> triangleIB;
-
-	triangleVB = std::make_shared<Sign::VertexBuffer>(triangleVertices, _countof(triangleVertices));
-	m_VertexArray->AddVertexBuffers(triangleVB);
-	triangleIB = std::make_shared<Sign::IndexBuffer>(trianlgeIndices, _countof(trianlgeIndices));
-	m_VertexArray->SetIndexBuffer(triangleIB);
-
+	m_Meshes.push_back(triangle);
+	m_InitialEntityCount++;
 
 /*	auto Cube = std::make_shared<Sign::CubeEntity>();
 	Cube->SetScale(Sign::Vector3D(0.5f, 0.5f, 0.5f));
@@ -50,17 +37,28 @@ void AppLayer::OnAttach()
 
 	auto plane = std::make_shared<Sign::PlaneEntity>();
 
-	//auto circle = std::make_shared<Sign::CircleEntity>();
-	//m_Meshes.push_back(circle);
+	auto circle = std::make_shared<Sign::CircleEntity>();
+	circle->SetTranslation({ 0.0f,0.0f,5.0f });
+
+	auto sphere = std::make_shared<Sign::SphereEntity>();
+	sphere->SetTranslation({ 5.0f,0.0f,5.0f });
+
+	m_Meshes.push_back(sphere);
+	m_InitialEntityCount++;
+
+	m_Meshes.push_back(circle);
+	m_InitialEntityCount++;
 	//m_Meshes.push_back(Cube);
 	//m_Meshes.push_back(Cube2);
 	m_Meshes.push_back(plane);
 	m_InitialEntityCount++;
+
 	/*for (int i = 0; i < 100; i++) {
 		auto Cube = std::make_shared<Sign::CubeEntity>();
 		Cube->SetTranslation({ MathUtils::Random_Float(-15.0f,15.0f),MathUtils::Random_Float(-15.0f,15.0f) ,MathUtils::Random_Float(-15.0f,15.0f) });
 		Cube->SetScale(Sign::Vector3D(0.5f, 0.5f, 0.5f));
 		m_Meshes.push_back(Cube);
+		m_InitialEntityCount++;
 	}*/
 }
 
@@ -77,6 +75,10 @@ void AppLayer::OnUpdate(Sign::Timestep dt)
 	}
 	
 	m_EditorCamera.OnUpdate(dt);
+
+	for (auto& entity : m_Meshes) {
+		entity->OnUpdate(dt);
+	}
 	//std::println("{} {}", Sign::Input::GetMouseX(), Sign::Input::GetMouseY());
 }
 
@@ -105,10 +107,10 @@ void AppLayer::OnRender()
 	}
 	m_PendingMeshes.clear();
 
-	Sign::Renderer::Submit(m_VertexArray, *m_GraphicsPipeline, Sign::Mat4::identity());
+	//Sign::Renderer::Submit(m_VertexArray, *m_Shader, Sign::Mat4::identity());
 
 	for (auto& mesh : m_Meshes) {
-		Sign::Renderer::Submit(mesh->GetMesh()->GetVertexArray(), *m_GraphicsPipeline, mesh->GetTransform());
+		Sign::Renderer::Submit(mesh->GetMesh()->GetVertexArray(), *mesh->GetShader(), mesh->GetTransform());
 	}
 
 	Sign::Renderer::EndScene();
@@ -152,6 +154,20 @@ bool AppLayer::OnKeyPressedEvent(Sign::KeyPressedEvent& e)
 			command->Execute();
 			std::println("Entitiy Number: {}", m_Meshes.size());
 			m_EditorHistory.Record(command);
+		}
+	}
+
+	bool control = Sign::Input::IsKeyPressed(Sign::Key::LControl) || Sign::Input::IsKeyPressed(Sign::Key::RControl);
+
+	switch (e.GetKeyCode()) 
+	{
+		case Sign::Key::Z: 
+		{
+			if (control) {
+				m_EditorHistory.Undo();
+				std::println("Undo");
+			}
+			break;
 		}
 	}
 	return false;

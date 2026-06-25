@@ -14,13 +14,13 @@ namespace Sign {
 		void setData(const void* data, uint32_t size, uint32_t offset = 0);
 
 	private:
-		Microsoft::WRL::ComPtr<ID3D12Resource> m_ConstantBuffer;
-		D3D12_CONSTANT_BUFFER_VIEW_DESC m_ConstantBufferView;
+		Microsoft::WRL::ComPtr<ID3D12Resource> m_ConstantBuffer[D3D12Utils::g_NumFrames];
+		D3D12_CONSTANT_BUFFER_VIEW_DESC m_ConstantBufferView[D3D12Utils::g_NumFrames];
 
 		uint32_t m_Size;
 		uint32_t m_HeapIndex;
 		
-		void* m_CpuMappedAddress = nullptr;
+		void* m_CpuMappedAddress[D3D12Utils::g_NumFrames] = { nullptr };
 	};
 }
 

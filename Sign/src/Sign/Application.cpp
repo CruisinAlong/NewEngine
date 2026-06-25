@@ -59,9 +59,8 @@ namespace Sign {
 
 		m_Running = true;
 		while (m_Running) {
-			auto currentTime = std::chrono::steady_clock::now();
-			std::chrono::duration<float>  dt = currentTime - m_LastFrameTime;
-			Timestep deltaTime = dt.count();
+			auto currentTime = Time::GetTime();
+			Timestep deltaTime = currentTime - m_LastFrameTime;
 
 			m_LastFrameTime = currentTime;
 

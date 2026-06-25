@@ -15,6 +15,7 @@
 #include "Events/Event.h"
 #include "Events/WindowEvents.h"
 #include "Renderer/Renderer.h"
+#include "Sign/Time.h"
 #include "Timestep.h"
 
 
@@ -49,7 +50,7 @@ namespace Sign {
 		std::shared_ptr<Window> m_Window;
 		LayerStack m_LayerStack;
 
-		std::chrono::high_resolution_clock::time_point m_LastFrameTime;
+		float m_LastFrameTime = 0.0f;
 		bool m_Running = false;
 	};
 }

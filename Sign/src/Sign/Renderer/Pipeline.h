@@ -3,13 +3,16 @@
 #include <directx/d3dx12.h>
 #include <wrl.h>
 #include <memory>
-#include "Sign/Shader/Shader.h"
+#include "Sign/Math/SignMath.h"
+
 namespace Sign {
 
 	struct PipelineSpecifications {
 		std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayout;
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE Topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		std::shared_ptr<Shader> Shader;
+		ID3DBlob* VertexBlob = nullptr;
+		ID3DBlob* PixelBlob = nullptr;
+		ID3DBlob* ComputeBlob = nullptr;
 		BOOL WireFrame = FALSE;
 		BOOL DepthTest = TRUE;
 		D3D12_RT_FORMAT_ARRAY RTVFormats= {};
@@ -56,7 +59,7 @@ namespace Sign {
 
 	class GraphicsPipeline final : public Pipeline {
 	public:
-		GraphicsPipeline(Microsoft::WRL::ComPtr<ID3D12Device2> device, const PipelineSpecifications& specs);
+		GraphicsPipeline(const PipelineSpecifications& specs);
 		void Bind(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList) const override;
 		void CreateRootSignature(Microsoft::WRL::ComPtr<ID3D12Device2> device) override;
 		void CreatePSO(Microsoft::WRL::ComPtr<ID3D12Device2> device, const PipelineSpecifications& specs) override;
@@ -64,7 +67,7 @@ namespace Sign {
 
 	class ComputePipeline final : public Pipeline {
 	public:
-		ComputePipeline(Microsoft::WRL::ComPtr<ID3D12Device2> device, const PipelineSpecifications& specs);
+		ComputePipeline(const PipelineSpecifications& specs);
 		void Bind(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList) const override;
 		void CreateRootSignature(Microsoft::WRL::ComPtr<ID3D12Device2> device) override;
 		void CreatePSO(Microsoft::WRL::ComPtr<ID3D12Device2> device, const PipelineSpecifications& specs) override;

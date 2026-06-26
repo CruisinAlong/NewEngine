@@ -1,5 +1,5 @@
 # About
-This is a DXD12 Game Engine using an Xmake build system
+This is a DXD12 Game Engine using the Xmake build system
 
 # How to Set-Up
 1. Go to Scripts Folder

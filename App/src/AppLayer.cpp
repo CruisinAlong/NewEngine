@@ -52,6 +52,7 @@ void AppLayer::OnAttach()
 	for (int i = 0; i < 15; i++) {
 		bool odd = (i % 2) != 0;
 		auto plane = std::make_shared<Sign::PlaneEntity>();
+		plane->SetScale({ 1.0f,1.0f,1.0f });
 
 		if (i == 6 || i == 7 || i == 12) {
 			m_Meshes.push_back(plane);
@@ -77,9 +78,9 @@ void AppLayer::OnAttach()
 		}
 		m_Meshes.push_back(plane);
 	}
-	float cardDistance = 5.0f * std::cos(MathUtils::ConvertToRadians(70.0f)) * 2;
-	float cardDistance2 = 5.0f * std::cos(MathUtils::ConvertToRadians(70.0f));
-	float cardHeight = 5.0f * std::sin(MathUtils::ConvertToRadians(70.0f));
+	float cardDistance = 0.5f * std::cos(MathUtils::ConvertToRadians(70.0f)) * 2;
+	float cardDistance2 = 0.5f * std::cos(MathUtils::ConvertToRadians(70.0f));
+	float cardHeight = 0.5f * std::sin(MathUtils::ConvertToRadians(70.0f));
 	float currentX = cardDistance;
 	float currentY = cardHeight;
 

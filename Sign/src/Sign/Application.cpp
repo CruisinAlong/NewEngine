@@ -38,7 +38,6 @@ namespace Sign {
 		Renderer::ShutDown();
 		m_Window.reset();
 		std::println("App Destroyed");
-
 		s_Application = nullptr;
 	}
 

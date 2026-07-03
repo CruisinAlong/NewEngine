@@ -10,20 +10,13 @@ namespace Sign
 		D3D12Context* m_Context = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>	m_CommandList;
 
-		D3D12_VIEWPORT					m_Viewport;
-		D3D12_RECT						m_ScissorsRect;
+		D3D12_VIEWPORT					m_Viewport{};
+		D3D12_RECT						m_ScissorsRect{};
 		std::shared_ptr<ConstantBuffer>	m_CameraConstantBuffer;
-		CameraData						m_CameraData;
+		CameraData						m_CameraData{};
 	};
 
 	static RendererData* s_Data = nullptr;
-
-	/*D3D12Context* Renderer::s_Context = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> Renderer::s_CommandList = nullptr;
-	D3D12_VIEWPORT Renderer::s_Viewport = {};
-	D3D12_RECT Renderer::s_ScissorsRect = {};
-	std::shared_ptr<ConstantBuffer> Renderer::m_CameraConstantBuffer = nullptr;
-	CameraData Renderer::m_CameraData = {};*/
 
 	void Renderer::Init(D3D12Context* context)
 	{

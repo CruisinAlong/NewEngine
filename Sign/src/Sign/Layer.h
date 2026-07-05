@@ -14,6 +14,7 @@ namespace Sign {
 		virtual void OnEvent(Event& event) {}
 		virtual void OnUpdate(Timestep dt) {}
 		virtual void OnRender() {}
+		virtual void OnImGuiRender() {}
 
 		template<std::derived_from<Layer> T, typename... Args>
 		void TransitionTo(Args&& ... args) {

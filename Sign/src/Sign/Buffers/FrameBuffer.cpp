@@ -1,6 +1,6 @@
 #include "signpch.h"
 #include "FrameBuffer.h"
-
+#include "Sign/Renderer/Renderer.h"
 
 namespace Sign {
 	FrameBuffer::FrameBuffer(const FrameBufferSpecifications& specs, ID3D12Device2* device) : m_FrameBufferSpecifications(specs), m_Device(device)
@@ -121,18 +121,17 @@ namespace Sign {
 		Invalidate();
 	}
 
-	void FrameBuffer::TransitionTo(D3D12_RESOURCE_STATES newState, uint32_t attachmentIndex)
+	void FrameBuffer::TransitionTo(ID3D12GraphicsCommandList2* cmdList, D3D12_RESOURCE_STATES newState, uint32_t attachmentIndex)
 	{
 		auto& attachment = m_ColorAttachments[attachmentIndex];
 		if (attachment.m_CurrentState == newState) return;
-		auto cmdList = Renderer::GetCommandList();
 		D3D12Utils::TransitionResource(cmdList, attachment.m_Resource, attachment.m_CurrentState, newState);
 		attachment.m_CurrentState = newState;
 	}
 
-	uint32_t FrameBuffer::GetTextureID(uint32_t attachmentIndex)
+	UINT64 FrameBuffer::GetTextureID(uint32_t attachmentIndex)
 	{
-		return m_ColorAttachments[attachmentIndex].m_SRVCpuHandle.ptr;
+		return m_ColorAttachments[attachmentIndex].m_SRVGpuHandle.ptr;
 	}
 	void FrameBuffer::ClearAttchment(const float clearColor[4])
 	{

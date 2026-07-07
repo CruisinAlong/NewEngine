@@ -15,7 +15,7 @@ namespace Sign {
 		void Alloc(D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_desc_handle);
 		void Free(D3D12_CPU_DESCRIPTOR_HANDLE out_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE out_gpu_desc_handle, uint64_t currentFenceValue);
 		void ProcessDeferredFrees();
-
+		ID3D12DescriptorHeap* GetHeap() {return m_Heap;}
 	private:
 		ID3D12DescriptorHeap*			m_Heap = nullptr;
 		D3D12_DESCRIPTOR_HEAP_TYPE		m_HeapType = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;

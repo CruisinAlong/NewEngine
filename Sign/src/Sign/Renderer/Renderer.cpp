@@ -10,6 +10,8 @@ namespace Sign
 		D3D12Context* m_Context = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>	m_CommandList;
 
+		std::unordered_map<std::string, std::shared_ptr<FrameBuffer>> m_ActiveFrameBuffers;
+
 		D3D12_VIEWPORT					m_Viewport{};
 		D3D12_RECT						m_ScissorsRect{};
 		std::shared_ptr<ConstantBuffer>	m_CameraConstantBuffer;
@@ -24,13 +26,14 @@ namespace Sign
 		s_Data->m_Context = context;
 
 		SetViewPort(0, 0, s_Data->m_Context->GetWidth(), s_Data->m_Context->GetHeight());
-
+		
 		s_Data->m_CameraConstantBuffer = std::make_shared<ConstantBuffer>(sizeof(CameraData), 0);
 	}
 
 	void Renderer::ShutDown()
 	{
 		s_Data->m_Context->FlushCommandQueue();
+		s_Data->m_ActiveFrameBuffers.clear();
 		s_Data->m_CameraConstantBuffer.reset();
 		s_Data->m_CommandList.Reset();
 		s_Data->m_Context = nullptr;
@@ -142,6 +145,22 @@ namespace Sign
 		s_Data->m_Context->FlushCommandQueue();
 		s_Data->m_Context->ResizeSwapBuffer(width, height);
 		s_Data->m_Context->ResizeDepthBuffer(width, height);
+	}
+
+	void Renderer::RegisterFrameBuffers(std::string_view name, std::shared_ptr<FrameBuffer> fb)
+	{
+		s_Data->m_ActiveFrameBuffers[name.data()] = fb;
+	}
+
+	std::shared_ptr<FrameBuffer> Renderer::GetFrameBuffer(std::string_view name)
+	{
+		auto it = s_Data->m_ActiveFrameBuffers.find(name.data());
+
+		return it != s_Data->m_ActiveFrameBuffers.end() ? it->second : nullptr;
+	}
+	const std::unordered_map<std::string, std::shared_ptr<FrameBuffer>> Renderer::GetAllFrameBuffers()
+	{
+		return s_Data->m_ActiveFrameBuffers;
 	}
 	D3D12Context* Renderer::GetContext()
 	{

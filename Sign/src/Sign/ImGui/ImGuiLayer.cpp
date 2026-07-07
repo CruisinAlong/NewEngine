@@ -140,15 +140,21 @@ namespace Sign {
 	}
     void ImGuiLayer::End()
     {
+
         ImGui::Render();
         ImGuiIO& io = ImGui::GetIO();
 
         auto context = Renderer::GetContext();
         auto commandQueue = context->GetCommandQueue();
         auto uiCommandList = commandQueue->GetCommandList();
-
+        
         ID3D12DescriptorHeap* heaps[] = { context->Get_CBV_SRV_UAV_DescriptorHeap().Get() };
         uiCommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+
+        for (auto& [name, fb] : Renderer::GetAllFrameBuffers()) {
+            fb->TransitionTo(uiCommandList.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        }
+
 
         auto backBuffer = context->GetBackBuffer(context->GetCurrentBackBuffer());
         auto rtv = context->GetCurrentTargetView();
@@ -160,7 +166,6 @@ namespace Sign {
             D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         uiCommandList->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
-
 
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), uiCommandList.Get());
 

@@ -5,6 +5,7 @@
 #include "Sign/Renderer/Renderer.h"
 #include "Sign/D3D12Utils.h"
 #include "Sign/Events/Event.h"
+#include "Sign/Buffers/FrameBuffer.h"
 
 namespace Sign {
 	class ImGuiLayer : public Layer

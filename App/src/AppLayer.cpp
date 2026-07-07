@@ -1,5 +1,6 @@
 #include "AppLayer.h"
 #include <imgui.h>
+
 AppLayer::AppLayer()
 {
 	std::println("App Layer Created");
@@ -14,6 +15,8 @@ void AppLayer::OnAttach()
 	frameSpecs.m_Width = Sign::Application::Get().GetWindow().GetWidth();
 	frameSpecs.m_Height = Sign::Application::Get().GetWindow().GetHeight();
 	m_FrameBuffer = std::make_shared<Sign::FrameBuffer>(frameSpecs, Sign::Renderer::GetContext()->GetDevice().Get());
+
+	Sign::Renderer::RegisterFrameBuffers("MainEditorBuffer", m_FrameBuffer);
 	
 	/*Sign::PipelineSpecifications pSpecs = {};
 	pSpecs.Shader = m_Shader;
@@ -145,17 +148,17 @@ void AppLayer::OnAttach()
 	}*/
 
 
-/*	auto circle = std::make_shared<Sign::CircleEntity>();
+	auto circle = std::make_shared<Sign::CircleEntity>();
 	circle->SetTranslation({ 0.0f,0.0f,5.0f });
 
 	auto sphere = std::make_shared<Sign::SphereEntity>();
-	sphere->SetTranslation({ 5.0f,0.0f,5.0f });*/
+	sphere->SetTranslation({ 5.0f,0.0f,5.0f });
 
-	/*m_Meshes.push_back(sphere);
+	m_Meshes.push_back(sphere);
 	m_InitialEntityCount++;
 
 	m_Meshes.push_back(circle);
-	m_InitialEntityCount++;*/
+	m_InitialEntityCount++;
 	//m_Meshes.push_back(Cube);
 	//m_Meshes.push_back(Cube2);
 /*	m_Meshes.push_back(plane);
@@ -220,12 +223,12 @@ void AppLayer::OnRender()
 	FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	Sign::Renderer::BeginFrame();
-	m_FrameBuffer->TransitionTo(D3D12_RESOURCE_STATE_RENDER_TARGET);
+	m_FrameBuffer->TransitionTo(Sign::Renderer::GetCommandList().Get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 	m_FrameBuffer->Bind();
 
-	Sign::Renderer::RenderClearCommand(clearColor);
+	//Sign::Renderer::RenderClearCommand(clearColor);
 	
-	m_FrameBuffer->ClearAttchment();
+	m_FrameBuffer->ClearAttchment(clearColor);
 
 	Sign::Renderer::BeginScene(m_EditorCamera);
 
@@ -262,7 +265,6 @@ void AppLayer::OnImGuiRender()
 		ImGui::SetNextWindowFocus();
 	ImGui::Begin("Examples: Dockspace", &dockSpaceOpen, ImGuiWindowFlags_MenuBar);
 
-	m_FrameBuffer->TransitionTo(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	opt_demo_mode_changed = false;
 	opt_demo_mode_changed |= ImGui::RadioButton("Basic demo mode", &opt_demo_mode, 0);
 	opt_demo_mode_changed |= ImGui::RadioButton("Advanced demo mode", &opt_demo_mode, 1);
@@ -313,8 +315,8 @@ void AppLayer::OnImGuiRender()
 		}
 		ImGui::EndMenuBar();
 	}
-	uint32_t coloraAttachment = m_FrameBuffer->GetTextureID();
-	ImGui::Image((void*)coloraAttachment, ImVec2(320.f, 180.f));
+	UINT64 coloraAttachment = m_FrameBuffer->GetTextureID();
+	ImGui::Image((ImTextureID)coloraAttachment, ImVec2(1024.f, 768.f));
 	ImGui::End();
 }
 

@@ -2,7 +2,7 @@
 #include "directx/d3d12.h"
 #include "wrl.h"
 #include "Sign/D3D12Utils.h"
-#include "Sign/Renderer/Renderer.h"
+
 namespace Sign {
 
 	struct FrameBufferAttachment {
@@ -33,8 +33,8 @@ namespace Sign {
 
 		void Bind();
 		void Resize(uint32_t width, uint32_t height);
-		void TransitionTo(D3D12_RESOURCE_STATES newState, uint32_t attachmentIndex = 0);
-		uint32_t GetTextureID(uint32_t attachmentIndex = 0);
+		void TransitionTo(ID3D12GraphicsCommandList2* cmdList,D3D12_RESOURCE_STATES newState, uint32_t attachmentIndex = 0);
+		UINT64 GetTextureID(uint32_t attachmentIndex = 0);
 
 		//TODO: Have mouse clicking detect if a specific entity gets clicked in the viewport
 		void ReadPixel();

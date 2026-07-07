@@ -59,5 +59,7 @@ namespace Sign {
 		float m_LastFrameTime = 0.0f;
 		bool m_Running = false;
 	};
+
+	Application* CreateApplication();
 }
 

@@ -1,12 +1,12 @@
-#include "AppLayer.h"
+#include "EditorLayer.h"
 #include "Sign/EntryPoint.h"
-class App : public Sign::Application {
+class Editor : public Sign::Application {
 public:
-	App(const Sign::ApplicationSpecifications& specs) 
-		: Sign::Application(specs) 
+	Editor(const Sign::ApplicationSpecifications& specs)
+		: Sign::Application(specs)
 	{
 
-		PushLayer(new AppLayer);
+		PushLayer(new EditorLayer);
 	}
 };
 
@@ -15,5 +15,5 @@ Sign::Application* Sign::CreateApplication() {
 	specifications.name = "DirectXEngine";
 	specifications.WindowSpec.Width = 1024;
 	specifications.WindowSpec.Height = 768;
-	return new App(specifications);
+	return new Editor(specifications);
 }

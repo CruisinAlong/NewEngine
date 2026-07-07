@@ -72,7 +72,65 @@ target("Sign")
 		add_defines("SIGN_RELEASE")
 		set_optimize("fast")
 	end
+	
+target("SignEditor")
+	set_kind("binary")
+	set_languages("c++23")
+	set_runtimes("MT")
 
+	set_targetdir("bin/".. outputdir .. "/SignEditor")
+	set_objectdir("bin-int/".. outputdir .. "/SignEditor")
+	set_rundir("$(projectdir)")
+
+	add_headerfiles("SignEditor/src/**.h")
+	add_files("SignEditor/src/**.cpp")
+	add_extrafiles("SignEditor/src/**.hlsl", {type = "plain"})
+
+	
+	--add_includedirs(
+		--"Core/vendor/spdlog/include", 
+		--"Core/src")
+	add_deps("Sign")
+
+	add_linkdirs("bin/"..outputdir.."/Sign")
+
+
+	if is_os("windows") then
+		if is_mode("debug") then
+			set_runtimes("MTd")
+		elseif is_mode("release") then
+			set_runtimes("MT")
+		end
+		add_defines("WINVER=0x0A00")
+		add_defines("_WIN32_WINNT=0x0A00") 
+		add_defines("SIGN_PLATFORM_WINDOWS")
+	end
+
+	on_load(function(target)
+		local shaderSrc = path.join(os.projectdir(), "SignEditor/src/Shader")
+		local arch = os.arch()
+		local mode = is_mode("debug") and "Debug" or "Release"
+		local shaderDest = path.join(os.projectdir(),"bin",mode.."-"..arch,"SignEditor", "Shader")
+		os.mkdir(shaderDest)
+        os.cp(shaderSrc .. "/**.hlsl", shaderDest)
+	end)
+
+	after_build(function(target)
+		local shaderSrc = path.join(os.projectdir(), "SignEditor/src/Shader")
+		local arch = os.arch()
+		local mode = is_mode("debug") and "Debug" or "Release"
+		local shaderDest = path.join(os.projectdir(),"bin",mode.."-"..arch,"SignEditor", "Shader")
+		os.mkdir(shaderDest)
+        os.cp(shaderSrc .. "/**.hlsl", shaderDest)
+	end)
+
+	if is_mode("debug") then
+		add_defines("SIGN_DEBUG")
+		set_symbols("debug")
+	elseif is_mode("release") then 
+		add_defines("SIGN_RELEASE")
+		set_optimize("fast")
+	end
 
 target("App")
 	set_kind("binary")

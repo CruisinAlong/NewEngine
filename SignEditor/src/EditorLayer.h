@@ -1,11 +1,10 @@
 #pragma once
 #include <Sign.h>
 
-
-class AppLayer : public Sign::Layer
+class EditorLayer : public Sign::Layer
 {
 public:
-	AppLayer();
+	EditorLayer();
 	virtual void OnAttach() override;
 	virtual void OnDettach() override;
 	virtual void OnUpdate(Sign::Timestep dt) override;

@@ -19,13 +19,14 @@ namespace Sign {
 	}
 	void Shader::Compile()
 	{
-		std::filesystem::path absoluteVertexPath = std::filesystem::absolute(m_VertexPath);
-		std::filesystem::path absolutePixelPath = std::filesystem::absolute(m_PixelPath);
+		std::filesystem::path exeDir = GetExePath();
+		std::filesystem::path absoluteVertexPath = exeDir / m_VertexPath;
+		std::filesystem::path absolutePixelPath = exeDir / m_PixelPath;
 		CompileShader(absoluteVertexPath.c_str(), "main", "vs_5_1", &vertexShaderBlob);
 		CompileShader(absolutePixelPath.c_str(), "main", "ps_5_1", &pixelShaderBlob);
 
 		if (m_ComputePath) {
-			std::filesystem::path absoluteComputePath = std::filesystem::absolute(m_ComputePath);
+			std::filesystem::path absoluteComputePath = exeDir / m_ComputePath;
 			CompileShader(absoluteComputePath.c_str(), "main", "cs_5_1", &computeShaderBlob);
 		}
 	
@@ -50,6 +51,16 @@ namespace Sign {
 
 		if (FAILED(hr))
 		{
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				std::cerr << "HLSL Compile Error:\n" << (char*)errorBlob->GetBufferPointer() << std::endl;
+			}
+			else
+			{
+				// Sometimes D3DCompileFromFile fails because the file doesn't exist at the path
+				std::wcerr << L"Shader file not found or inaccessible at: " << path << std::endl;
+			}
 			assert(false && "Shader Compilation Failed");
 		}
 

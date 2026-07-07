@@ -1,6 +1,7 @@
 #pragma once
 #include <Sign.h>
-
+// Forward declare probuilder types to avoid coupling headers here
+namespace ProBuilder { class ProBuilderEditorWindow; class ProBuilderTool; }
 class EditorLayer : public Sign::Layer
 {
 public:
@@ -28,5 +29,9 @@ private:
 	Sign::EditorHistory m_EditorHistory;
 
 	Sign::PerspectiveCamera m_EditorCamera;
+
+	// ProBuilder tool & window (basic scaffold)
+	std::unique_ptr<ProBuilder::ProBuilderTool> m_ProBuilderTool;
+	std::unique_ptr<ProBuilder::ProBuilderEditorWindow> m_ProBuilderWindow;
 };
 

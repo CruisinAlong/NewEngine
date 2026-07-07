@@ -1,5 +1,7 @@
 #include "EditorLayer.h"
 #include <imgui.h>
+#include "ProBuilder/ProBuilderEditorWindow.h"
+#include "ProBuilder/ProBuilderTool.h"
 
 EditorLayer::EditorLayer()
 {
@@ -172,7 +174,11 @@ void EditorLayer::OnAttach()
 		m_InitialEntityCount++;
 	}*/
 
-	std::println("Entity Numbers: {}", m_Meshes.size());
+    std::println("Entity Numbers: {}", m_Meshes.size());
+
+	// Create ProBuilder UI/tool
+	m_ProBuilderWindow = std::make_unique<ProBuilder::ProBuilderEditorWindow>();
+	m_ProBuilderTool = std::make_unique<ProBuilder::ProBuilderTool>();
 }
 
 void EditorLayer::OnDettach()
@@ -184,6 +190,10 @@ void EditorLayer::OnDettach()
 	m_VertexArray.reset();
 	m_FrameBuffer.reset();
 	m_Shader.reset();
+
+	// Tear down ProBuilder UI/tool
+	m_ProBuilderWindow.reset();
+	m_ProBuilderTool.reset();
 }
 
 void EditorLayer::OnUpdate(Sign::Timestep dt)
@@ -233,8 +243,11 @@ void EditorLayer::OnRender()
 	Sign::Renderer::BeginScene(m_EditorCamera);
 
 	//Need for open commandlist, might have to make a separate func for this
-	for (auto& pending : m_PendingMeshes) {
-		Sign::CreateObjectCommand* command = new Sign::CreateObjectCommand(m_Meshes, Sign::PrimitiveType::Cube);
+    for (auto& pending : m_PendingMeshes) {
+		// C++
+		const float spawnDistance = 5.0f;
+		Sign::Vector3D spawnPos = m_EditorCamera.GetPosition() + m_EditorCamera.GetForwardDirection() * spawnDistance;
+		Sign::CreateObjectCommand* command = new Sign::CreateObjectCommand(m_Meshes, pending, spawnPos);
 		command->Execute();
 		m_EditorHistory.Record(command);
 	}
@@ -243,8 +256,9 @@ void EditorLayer::OnRender()
 	//Sign::Renderer::Submit(m_VertexArray, *m_Shader, Sign::Mat4::identity());
 
 	for (auto& mesh : m_Meshes) {
-		if (mesh->HasMesh())
-			Sign::Renderer::Submit(mesh->GetMesh()->GetVertexArray(), *mesh->GetShader(), mesh->GetTransform());
+        if (!mesh) continue;
+        if (mesh->HasMesh())
+            Sign::Renderer::Submit(mesh->GetMesh()->GetVertexArray(), *mesh->GetShader(), mesh->GetTransform());
 	}
 
 	Sign::Renderer::EndScene();
@@ -295,8 +309,17 @@ void EditorLayer::OnImGuiRender()
 	}
 
 	// Show demo options and help
-	if (ImGui::BeginMenuBar())
+    if (ImGui::BeginMenuBar())
 	{
+        if (ImGui::BeginMenu("Tools")) {
+			if (m_ProBuilderWindow)
+			{
+				bool vis = m_ProBuilderWindow->IsVisible();
+				ImGui::MenuItem("ProBuilder", NULL, &vis);
+				m_ProBuilderWindow->SetVisible(vis);
+			}
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("Help"))
 		{
 			ImGui::TextUnformatted(
@@ -315,8 +338,13 @@ void EditorLayer::OnImGuiRender()
 		}
 		ImGui::EndMenuBar();
 	}
-	UINT64 coloraAttachment = m_FrameBuffer->GetTextureID();
+    UINT64 coloraAttachment = m_FrameBuffer->GetTextureID();
 	ImGui::Image((ImTextureID)coloraAttachment, ImVec2(1024.f, 768.f));
+
+	// Render ProBuilder window if present
+	if (m_ProBuilderWindow)
+		m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes);
+
 	ImGui::End();
 }
 

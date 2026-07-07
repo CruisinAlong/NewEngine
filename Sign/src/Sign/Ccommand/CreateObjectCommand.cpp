@@ -2,30 +2,46 @@
 #include "CreateObjectCommand.h"
 
 namespace Sign {
-	void CreateObjectCommand::Execute()
-	{
-		if (m_Entity == nullptr) {
-			switch (m_PType) {
-			case PrimitiveType::Cube:
-				m_Entity = std::make_shared<CubeEntity>();
-				m_Entity->SetTranslation({ MathUtils::Random_Float(-10.0f,10.0f),MathUtils::Random_Float(-10.0f,10.0f) ,MathUtils::Random_Float(-10.0f,10.0f) });
-				std::println("Cube Added");
-				break;
-			case PrimitiveType::Plane:
-				m_Entity = std::make_shared<PlaneEntity>();
-				m_Entity->SetTranslation({ MathUtils::Random_Float(-15.0f,15.0f),MathUtils::Random_Float(-15.0f,15.0f) ,MathUtils::Random_Float(-15.0f,15.0f) });
-				break;
-			}
-		}
-		
-		m_EntityList.push_back(m_Entity);
-	}
-	void CreateObjectCommand::Undo()
-	{
-		auto it = std::find(m_EntityList.begin(), m_EntityList.end(), m_Entity);
+    void CreateObjectCommand::Execute()
+    {
+        if (m_Entity == nullptr) {
+            switch (m_PType) {
+            case PrimitiveType::Cube:
+                m_Entity = std::make_shared<CubeEntity>();
+                break;
+            case PrimitiveType::Plane:
+                m_Entity = std::make_shared<PlaneEntity>();
+                break;
+            case PrimitiveType::Sphere:
+                m_Entity = std::make_shared<SphereEntity>();
+                break;
+            case PrimitiveType::Circle:
+                m_Entity = std::make_shared<CircleEntity>();
+                break;
+            default:
+                std::println("CreateObjectCommand::Execute - unhandled PrimitiveType: {}", static_cast<int>(m_PType));
+                break;
+            }
+        }
 
-		if (it != m_EntityList.end()) {
-			m_EntityList.erase(it);
-		}
-	}
+        if (!m_Entity) {
+            return;
+        }
+
+        if (m_UseSpawn) {
+            m_Entity->SetTranslation(m_SpawnPos);
+        } else {
+			std::println("CreateObjectCommand::Execute - No spawn position provided, using default translation.");
+        }
+
+        m_EntityList.push_back(m_Entity);
+    }
+
+    void CreateObjectCommand::Undo()
+    {
+        auto it = std::find(m_EntityList.begin(), m_EntityList.end(), m_Entity);
+        if (it != m_EntityList.end()) {
+            m_EntityList.erase(it);
+        }
+    }
 }

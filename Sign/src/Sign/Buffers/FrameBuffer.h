@@ -18,7 +18,7 @@ namespace Sign {
 		uint32_t m_Width = 0;
 		uint32_t m_Height = 0;
 		std::vector<DXGI_FORMAT> m_ColorFormats = { DXGI_FORMAT_R8G8B8A8_UNORM };
-		DXGI_FORMAT m_DepthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		DXGI_FORMAT m_DepthFormat = DXGI_FORMAT_D32_FLOAT;
 		bool HasDepth = true;
 		uint32_t m_Samples = 1;
 	};

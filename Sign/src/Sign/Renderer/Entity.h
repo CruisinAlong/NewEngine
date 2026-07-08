@@ -9,11 +9,12 @@
 #include "Sign/Timestep.h"
 
 namespace Sign {
-	enum class PrimitiveType {
+    enum class PrimitiveType {
 		Cube,
 		Plane,
 		Circle,
-		Sphere
+		Sphere,
+		Cylinder
 	};
 	class Entity
 	{

@@ -9,6 +9,8 @@
 #include "Sign/Renderer/CircleEntity.h"
 #include "Sign/Math/SignMath.h" // for Vector3D
 
+// forward declare CylinderEntity to avoid including its header in this header
+namespace Sign { class CylinderEntity; }
 namespace Sign {
 	class CreateObjectCommand : public EditorCommand
 	{

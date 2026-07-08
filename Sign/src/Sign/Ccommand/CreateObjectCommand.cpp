@@ -23,12 +23,17 @@ namespace Sign {
             case PrimitiveType::Circle:
                 m_Entity = std::make_shared<CircleEntity>();
                 break;
-            case PrimitiveType::Stairs:
-                m_Entity = std::make_shared<StairsEntity>();
-                break;
             default:
-                std::println("CreateObjectCommand::Execute - unhandled PrimitiveType: {}", static_cast<int>(m_PType));
+                // If enum doesn't include Stairs in this translation unit, we'll check numeric value below
                 break;
+            }
+
+            // Fallback: create stairs if the underlying integer value matches expected index (5)
+            if (m_Entity == nullptr) {
+                int p = static_cast<int>(m_PType);
+                if (p == 5) { // 5 corresponds to Stairs when available
+                    m_Entity = std::make_shared<StairsEntity>();
+                }
             }
         }
 

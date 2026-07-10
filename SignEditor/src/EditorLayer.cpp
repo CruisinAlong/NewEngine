@@ -288,10 +288,6 @@ namespace Sign {
 			if (mesh->HasMesh())
 				Renderer::Submit(mesh->GetMesh()->GetVertexArray(), *mesh->GetShader(), mesh->GetTransform());
 		}
-
-		Renderer::EndScene();
-
-
 		Vector2D viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
 		my = viewportSize.y - my;
 		int mouseX = (int)mx;
@@ -299,10 +295,14 @@ namespace Sign {
 
 		if (Input::IsMouseButtonPressed(Mouse::LeftButton)) {
 			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y) {
-				//int pixelData = m_FrameBuffer->ReadPixel(1, mouseX, mouseY);
-				//std::println("Pixel Data: {}", pixelData);
+				int pixelData = m_FrameBuffer->ReadPixel(1, mouseX, mouseY);
+				std::println("Pixel Data: {}", pixelData);
 			}
 		}
+		Renderer::EndScene();
+
+
+
 	}
 
 	void EditorLayer::OnImGuiRender()

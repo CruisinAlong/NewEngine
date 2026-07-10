@@ -19,6 +19,11 @@
 #include "Sign/Renderer/CircleEntity.h"
 #include "Sign/Renderer/TriangleEntity.h"
 #include "Sign/Renderer/EmptyEntity.h"
+
+#include "Sign/Scene/Scene.h"
+#include "Sign/Scene/EntityECS.h"
+#include "Sign/Scene/ECS/Components.h"
+
 #include "Sign/Ccommand/EditorCommand.h"
 #include "Sign/Buffers/FrameBuffer.h"
 

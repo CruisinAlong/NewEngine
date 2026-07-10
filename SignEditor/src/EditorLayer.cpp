@@ -15,11 +15,21 @@ namespace Sign {
 		FrameBufferSpecifications frameSpecs = {};
 		frameSpecs.m_Width = Application::Get().GetWindow().GetWidth();
 		frameSpecs.m_Height = Application::Get().GetWindow().GetHeight();
+		frameSpecs.m_ColorFormats = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_SINT };
 		m_FrameBuffer = std::make_shared<FrameBuffer>(frameSpecs, Renderer::GetContext()->GetDevice().Get());
 
 		Renderer::RegisterFrameBuffers("MainEditorBuffer", m_FrameBuffer);
 
+		/*************** ECS VERSION ********************/
+		m_ActiveScene = std::make_shared<Scene>();
 
+		auto CubeECS = m_ActiveScene->CreateEntity();
+		CubeECS.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
+		auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
+		CubeTransform.Translation = { 5.0f,0.0f,5.0f };
+		/***********************************************/
+
+		/*************** OOP VERSION ********************/
 		auto Cube = std::make_shared<CubeEntity>();
 		Cube->SetTranslation({ 0.0f,0.0f,5.0f });
 		auto plane = std::make_shared<PlaneEntity>();
@@ -27,6 +37,9 @@ namespace Sign {
 
 		m_Meshes.push_back(Cube);
 		m_Meshes.push_back(plane);
+		/***********************************************/
+
+
 		/*PipelineSpecifications pSpecs = {};
 		pSpecs.Shader = m_Shader;
 		pSpecs.InputLayout = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -191,6 +204,8 @@ namespace Sign {
 		m_PendingMeshes.clear();
 		m_Meshes.shrink_to_fit();
 		m_VertexArray.reset();
+
+		m_ActiveScene.reset();
 		m_FrameBuffer.reset();
 		m_Shader.reset();
 	}
@@ -206,6 +221,9 @@ namespace Sign {
 		if (Input::IsKeyPressed(Key::Esc)) {
 			Application::Get().Stop();
 		}
+
+
+		
 
 		m_EditorCamera.OnUpdate(dt);
 
@@ -241,6 +259,9 @@ namespace Sign {
 		}
 		m_FrameBuffer->TransitionTo(Renderer::GetCommandList().Get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_FrameBuffer->Bind();
+		auto [mx, my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
 
 		//Renderer::RenderClearCommand(clearColor);
 
@@ -256,7 +277,12 @@ namespace Sign {
 		}
 		m_PendingMeshes.clear();
 
-		//Renderer::Submit(m_VertexArray, *m_Shader, Mat4::identity());
+
+		/*******ECS********/
+		m_ActiveScene->RenderScene();
+		/*****************/
+
+
 
 		for (auto& mesh : m_Meshes) {
 			if (mesh->HasMesh())
@@ -264,6 +290,19 @@ namespace Sign {
 		}
 
 		Renderer::EndScene();
+
+
+		Vector2D viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		my = viewportSize.y - my;
+		int mouseX = (int)mx;
+		int mouseY = (int)my;
+
+		if (Input::IsMouseButtonPressed(Mouse::LeftButton)) {
+			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y) {
+				int pixelData = m_FrameBuffer->ReadPixel(1, mouseX, mouseY);
+				std::println("Pixel Data: {}", pixelData);
+			}
+		}
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -335,7 +374,11 @@ namespace Sign {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport");
-
+		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		auto viewportOffset = ImGui::GetWindowPos();
+		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 		UINT64 coloraAttachment = m_FrameBuffer->GetTextureID();

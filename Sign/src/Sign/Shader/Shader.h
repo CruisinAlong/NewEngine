@@ -24,6 +24,7 @@ namespace Sign {
 		void SetGraphicsPipeline(const PipelineSpecifications& spec);
 
 		void Bind(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>& commandList) const;
+		static std::shared_ptr<Shader> GetDefault();
 
 		std::filesystem::path GetExePath();
 
@@ -37,6 +38,8 @@ namespace Sign {
 		Microsoft::WRL::ComPtr<ID3DBlob> computeShaderBlob;
 
 		std::unique_ptr<GraphicsPipeline> m_GraphicsPipeline;
+
+		inline static std::shared_ptr<Shader> s_DefaultShader = nullptr;
 
 		const WCHAR* m_VertexPath;
 		const WCHAR* m_PixelPath;

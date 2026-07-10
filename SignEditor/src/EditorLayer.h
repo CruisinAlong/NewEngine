@@ -22,6 +22,9 @@ namespace Sign {
 		std::shared_ptr<FrameBuffer> m_FrameBuffer;
 
 		Vector2D m_ViewportSize = { 0.0f,0.0f };
+		Vector2D m_ViewportBounds[2];
+
+		std::shared_ptr<Scene> m_ActiveScene;
 
 		std::shared_ptr<Shader> m_Shader;
 		std::vector<std::shared_ptr<Entity>> m_Meshes;

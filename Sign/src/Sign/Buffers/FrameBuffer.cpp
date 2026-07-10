@@ -133,16 +133,81 @@ namespace Sign {
 	{
 		return m_ColorAttachments[attachmentIndex].m_SRVGpuHandle.ptr;
 	}
+	int FrameBuffer::ReadPixel(uint32_t attachmentID, int x, int y)
+	{
+		if (x < 0 || y < 0 || x >= (int)m_FrameBufferSpecifications.m_Width || y >= (int)m_FrameBufferSpecifications.m_Height)
+			return -1;
+
+		auto& attachment = m_ColorAttachments[attachmentID];
+		
+		auto cmdList = Renderer::GetCommandList();
+
+		
+		D3D12Utils::TransitionResource(
+			cmdList,
+			attachment.m_Resource,
+			attachment.m_CurrentState,
+			D3D12_RESOURCE_STATE_COPY_SOURCE
+		);
+		attachment.m_CurrentState = D3D12_RESOURCE_STATE_COPY_SOURCE;
+
+		const UINT rowPitch = 256;
+
+		if (!m_ReadBackBuffer) {
+			m_ReadBackBuffer = D3D12Utils::CreateBuffer(
+				Renderer::GetContext()->GetDevice(),
+				rowPitch,
+				D3D12_RESOURCE_FLAG_NONE,
+				D3D12_RESOURCE_STATE_COPY_DEST,
+				D3D12Utils::ReadBackHeapProps
+				);
+		}
+
+		D3D12_TEXTURE_COPY_LOCATION src = {};
+		src.pResource = attachment.m_Resource.Get();
+		src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+		src.SubresourceIndex = 0;
+		
+		D3D12_TEXTURE_COPY_LOCATION dst = {};
+		dst.pResource = m_ReadBackBuffer.Get();
+		dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+		dst.PlacedFootprint.Footprint.Format = attachment.m_Format;
+		dst.PlacedFootprint.Footprint.Depth = 1;
+		dst.PlacedFootprint.Footprint.Height = 1;
+		dst.PlacedFootprint.Footprint.Width = 1;
+		dst.PlacedFootprint.Footprint.RowPitch = rowPitch;
+
+		D3D12_BOX srcBox = { (UINT)x, (UINT)y,0,(UINT)x + 1,(UINT)y + 1,1 };
+		cmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, &srcBox);
+
+		D3D12Utils::TransitionResource(cmdList, attachment.m_Resource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		attachment.m_CurrentState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+		Renderer::GetContext()->FlushCommandQueue();
+
+		int result = -1;
+		D3D12_RANGE readRange = { 0, sizeof(int) };
+		void* mapped = nullptr;
+		m_ReadBackBuffer->Map(0, &readRange, &mapped);
+		memcpy(&result, mapped, sizeof(int));
+		D3D12_RANGE writeRange = { 0, 0 };
+		m_ReadBackBuffer->Unmap(0, &writeRange);
+
+		return result;
+
+	}
 	void FrameBuffer::ClearAttchment(const float clearColor[4])
 	{
 		auto* cmdList = Renderer::GetCommandList().Get();
 		static const float defaultColor[4] = { 0.f,0.f,0.f,1.0f };
-
+		static const float pickClear[4] = { -1.f,-1.f,-1.f,-1.f };
 		const float* color = clearColor ? clearColor : defaultColor;
 
 
 		for (auto& attch : m_ColorAttachments) {
-			cmdList->ClearRenderTargetView(attch.m_Handle, color, 0, nullptr);
+
+			const float* c = (attch.m_Format == DXGI_FORMAT_R32_SINT) ? pickClear : color;
+			cmdList->ClearRenderTargetView(attch.m_Handle, c, 0, nullptr);
 		}
 
 		if (m_FrameBufferSpecifications.HasDepth) {

@@ -7,11 +7,78 @@ namespace Sign {
 			VertexPosColor CubeVertices[8];
 
 			for (size_t i = 0; i < 8; i++) {
-				CubeVertices[i] = {cubePosition[i], color[i]};
+				CubeVertices[i] = { cubePosition[i], color[i] };
 			}
 
 
-			return std::make_shared<Mesh>(CubeVertices,_countof(CubeVertices),cubeIndices,_countof(cubeIndices));
+			return std::make_shared<Mesh>(CubeVertices, _countof(CubeVertices), cubeIndices, _countof(cubeIndices));
+		}
+
+		std::shared_ptr<Mesh> Cylinder::Create(float radius, float height, int segments, const Vector3D& Color)
+		{
+			if (segments < 3) segments = 3;
+			std::vector<VertexPosColor> vertices;
+			std::vector<WORD> indices;
+
+			float half = height * 0.5f;
+
+			// Top center
+			vertices.push_back({ Vector3D(0.0f, half, 0.0f), Color });
+
+			// Top ring
+			for (int i = 0; i < segments; i++) {
+				float angle = (MathUtils::PI * 2.0f * i) / (float)segments;
+				float x = radius * std::cosf(angle);
+				float z = radius * std::sinf(angle);
+				vertices.push_back({ Vector3D(x, half, z), Color });
+			}
+
+			// Bottom ring
+			for (int i = 0; i < segments; i++) {
+				float angle = (MathUtils::PI * 2.0f * i) / (float)segments;
+				float x = radius * std::cosf(angle);
+				float z = radius * std::sinf(angle);
+				vertices.push_back({ Vector3D(x, -half, z), Color });
+			}
+
+			// Bottom center
+			vertices.push_back({ Vector3D(0.0f, -half, 0.0f), Color });
+
+			const WORD topCenterIndex = 0;
+			const WORD topStart = 1;
+			const WORD bottomStart = (WORD)(1 + segments);
+			const WORD bottomCenterIndex = (WORD)(vertices.size() - 1);
+
+			// Top fan
+			for (int i = 0; i < segments; i++) {
+				indices.push_back(topCenterIndex);
+				indices.push_back((WORD)(topStart + i));
+				indices.push_back((WORD)(topStart + ((i + 1) % segments)));
+			}
+
+			// Side quads (two triangles each)
+			for (int i = 0; i < segments; i++) {
+				int next = (i + 1) % segments;
+
+				// triangle 1: top(i), bottom(i), top(next)
+				indices.push_back((WORD)(topStart + i));
+				indices.push_back((WORD)(bottomStart + i));
+				indices.push_back((WORD)(topStart + next));
+
+				// triangle 2: top(next), bottom(i), bottom(next)
+				indices.push_back((WORD)(topStart + next));
+				indices.push_back((WORD)(bottomStart + i));
+				indices.push_back((WORD)(bottomStart + next));
+			}
+
+			// Bottom fan (winding to match top)
+			for (int i = 0; i < segments; i++) {
+				indices.push_back(bottomCenterIndex);
+				indices.push_back((WORD)(bottomStart + ((i + 1) % segments)));
+				indices.push_back((WORD)(bottomStart + i));
+			}
+
+			return std::make_shared<Mesh>(vertices.data(), (uint32_t)vertices.size(), indices.data(), (uint32_t)indices.size());
 		}
 
 		std::shared_ptr<Mesh> Sphere::Create(const Vector3D& Color)
@@ -28,7 +95,7 @@ namespace Sign {
 			float hAngle1 = -MathUtils::PI / 2 - H_ANGLE / 2;
 			float hAngle2 = -MathUtils::PI / 2;
 
-			vertices.insert(vertices.end(), {0.0f,0.0f,radius});
+			vertices.insert(vertices.end(), { 0.0f,0.0f,radius });
 
 			for (int i = 0; i < 5; i++) {
 
@@ -133,7 +200,7 @@ namespace Sign {
 
 			}
 			std::vector<VertexPosColor> finalVertices;
-			for (int i = 0; i < (int)vertices.size(); i+= 3) {
+			for (int i = 0; i < (int)vertices.size(); i += 3) {
 				VertexPosColor v;
 				v.Position = { vertices[i],vertices[i + 2], vertices[i + 1] };
 				v.Color = Color;
@@ -159,6 +226,46 @@ namespace Sign {
 			out[1] = out[1] / len * radius;
 			out[2] = out[2] / len * radius;
 		}
+
+		// Stairs: each step is a slab between previous depth and current depth.
+		// Bottom of every slab is y = 0; top increases per step so the overall silhouette is a staircase.
+		std::shared_ptr<Mesh> Stairs::Create(int steps, float stepWidth, float stepHeight, float depthPerStep, const Vector3D& Color)
+		{
+			if (steps < 1) steps = 1;
+			std::vector<VertexPosColor> vertices;
+			std::vector<WORD> indices;
+
+			float halfW = stepWidth * 0.5f;
+
+			for (int i = 0; i < steps; ++i)
+			{
+				// front is the inner face of this step, back is the outer face
+				float frontZ = -i * depthPerStep;
+				float backZ = -(i + 1) * depthPerStep;
+				float height = (i + 1) * stepHeight;
+
+				VertexPosColor box[8] = {
+					{ Vector3D(-halfW, 0.0f,  frontZ), Color }, // 0 front-bottom-left
+					{ Vector3D(-halfW, height, frontZ), Color }, // 1 front-top-left
+					{ Vector3D( halfW, height, frontZ), Color }, // 2 front-top-right
+					{ Vector3D( halfW, 0.0f,  frontZ), Color }, // 3 front-bottom-right
+					{ Vector3D(-halfW, 0.0f,  backZ), Color },  // 4 back-bottom-left
+					{ Vector3D(-halfW, height, backZ), Color }, // 5 back-top-left
+					{ Vector3D( halfW, height, backZ), Color }, // 6 back-top-right
+					{ Vector3D( halfW, 0.0f,  backZ), Color }   // 7 back-bottom-right
+				};
+
+				WORD baseIndex = (WORD)vertices.size();
+				for (int v = 0; v < 8; ++v)
+					vertices.push_back(box[v]);
+
+				for (size_t k = 0; k < _countof(cubeIndices); ++k)
+					indices.push_back((WORD)(baseIndex + cubeIndices[k]));
+			}
+
+			return std::make_shared<Mesh>(vertices.data(), (uint32_t)vertices.size(), indices.data(), (uint32_t)indices.size());
+		}
+
 		std::shared_ptr<Mesh> Plane::Create(const std::array<Vector3D, 4>& color)
 		{
 			VertexPosColor planeVertices[4];

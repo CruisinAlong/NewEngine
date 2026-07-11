@@ -14,7 +14,8 @@ namespace Sign {
 		Plane,
 		Circle,
 		Sphere,
-		Cylinder
+		Cylinder,
+		Stairs
 	};
 	class Entity
 	{

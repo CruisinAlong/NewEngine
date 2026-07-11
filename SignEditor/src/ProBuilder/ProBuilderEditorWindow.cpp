@@ -24,6 +24,8 @@ void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pen
         pending.push_back(Sign::PrimitiveType::Cylinder);
     if (ImGui::Button("Create Sphere"))
         pending.push_back(Sign::PrimitiveType::Sphere);
+    if (ImGui::Button("Create Stairs"))
+		pending.push_back(Sign::PrimitiveType::Stairs);
 
     ImGui::End();
 }

@@ -128,9 +128,28 @@ namespace Sign {
 		for (auto& pending : m_PendingMeshes) {
 			const float spawnDistance = 5.0f;
 			Vector3D spawnPos = m_EditorCamera.GetPosition() + m_EditorCamera.GetForwardDirection() * spawnDistance;
-			CreateObjectCommand* command = new CreateObjectCommand(m_Meshes, pending, spawnPos);
-			command->Execute();
-			m_EditorHistory.Record(command);
+			auto entity = m_ActiveScene->CreateEntity();
+			switch (pending) {
+			case PrimitiveType::Cube:
+				entity.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
+				break;
+			case PrimitiveType::Plane:
+				entity.AddComponent<MeshRendererComponent>(Primitive::Plane::Create());
+				break;
+			case PrimitiveType::Cylinder:
+				entity.AddComponent<MeshRendererComponent>(Primitive::Cylinder::Create());
+				break;
+			case PrimitiveType::Sphere:
+				entity.AddComponent<MeshRendererComponent>(Primitive::Sphere::Create());
+				break;
+			case PrimitiveType::Stairs:
+				entity.AddComponent<MeshRendererComponent>(Primitive::Stairs::Create());
+				break;
+			default:
+				break;
+			}
+			entity.GetComponent<TransformComponent>().Translation = spawnPos;
+			// TODO: push an EditorCommand that wraps ECS creation if you want undo/redo support
 		}
 		m_PendingMeshes.clear();
 

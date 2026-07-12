@@ -14,18 +14,28 @@ void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pen
 
     ImGui::Begin("ProBuilder", &m_Open);
 
-    if (ImGui::Button("Create Cube"))
+    if (ImGui::Button("Create Cube")) {
         pending.push_back(Sign::PrimitiveType::Cube);
+        std::println("[ProBuilder] Create Cube clicked");
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Create Plane"))
+    if (ImGui::Button("Create Plane")) {
         pending.push_back(Sign::PrimitiveType::Plane);
+        std::println("[ProBuilder] Create Plane clicked");
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Create Cylinder"))
+    if (ImGui::Button("Create Cylinder")) {
         pending.push_back(Sign::PrimitiveType::Cylinder);
-    if (ImGui::Button("Create Sphere"))
+        std::println("[ProBuilder] Create Cylinder clicked");
+    }
+    if (ImGui::Button("Create Sphere")) {
         pending.push_back(Sign::PrimitiveType::Sphere);
-    if (ImGui::Button("Create Stairs"))
-		pending.push_back(Sign::PrimitiveType::Stairs);
+        std::println("[ProBuilder] Create Sphere clicked");
+    }
+    if (ImGui::Button("Create Stairs")) {
+        pending.push_back(Sign::PrimitiveType::Stairs);
+        std::println("[ProBuilder] Create Stairs clicked");
+    }
 
     ImGui::End();
 }

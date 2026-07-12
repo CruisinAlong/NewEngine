@@ -2,13 +2,24 @@
 
 namespace Sign {
 	namespace Primitive {
-		std::shared_ptr<Mesh> Cube3D::Create(const std::array<Vector3D, 8>& color)
+		std::shared_ptr<Mesh> Cube3D::Create(const std::array<Vector3D, 6>& color)
 		{
-			VertexPosColor CubeVertices[8];
 
-			for (size_t i = 0; i < 8; i++) {
-				CubeVertices[i] = {cubePosition[i], color[i]};
-			}
+			VertexPosColor CubeVertices[24] = {
+				//Back Face
+				{cubePosition[0], color[0],0}, {cubePosition[1], color[0],0},{cubePosition[2],color[0],0}, {cubePosition[3], color[0],0},
+				//Front Face
+				{cubePosition[4], color[1],1}, {cubePosition[5],color[1],1}, {cubePosition[6],color[1],1}, {cubePosition[7],color[1],1},
+				//Left Face
+				{cubePosition[0], color[2],2}, {cubePosition[1],color[2],2}, {cubePosition[5],color[2],2}, {cubePosition[4],color[2],2},
+				//Right Face
+				{cubePosition[3], color[3],3}, {cubePosition[2],color[3],3}, {cubePosition[6],color[3],3}, {cubePosition[7],color[3],3},
+				//Top Face
+				{cubePosition[1], color[4],4}, {cubePosition[5],color[4],4}, {cubePosition[6],color[4],4}, {cubePosition[2],color[4],4},
+				//Bottom Face
+				{cubePosition[0], color[5],5}, {cubePosition[4],color[5],5}, {cubePosition[7],color[5],5}, {cubePosition[3],color[5],5}
+			};
+
 
 
 			return std::make_shared<Mesh>(CubeVertices,_countof(CubeVertices),cubeIndices,_countof(cubeIndices));
@@ -164,7 +175,7 @@ namespace Sign {
 			VertexPosColor planeVertices[4];
 
 			for (size_t i = 0; i < 4; i++) {
-				planeVertices[i] = { planePosition[i], color[i] };
+				planeVertices[i] = { planePosition[i], color[i],0 };
 			}
 			return std::make_shared<Mesh>(planeVertices, _countof(planeVertices), quadIndices, _countof(quadIndices));
 		}

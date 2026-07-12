@@ -10,14 +10,12 @@ namespace Sign {
 								{ 1.0f, 0.0f, 0.0f },
 								{ 0.0f, 0.0f, 1.0f },
 								{ 0.0f, 1.0f, 1.0f },
-								{ 1.0f, 1.0f, 1.0f },
-								{ 1.0f, 0.0f, 1.0f },
-								{ 1.0f, 1.0f, 1.0f },
+								{ 1.0f, 1.0f, 1.0f }
 								} });
 		}
 		SetMesh(s_DefaultCubeMesh);
 	}
-	CubeEntity::CubeEntity(const std::array<Vector3D, 8>& color)
+	CubeEntity::CubeEntity(const std::array<Vector3D, 6>& color)
 	{
 		SetMesh(Primitive::Cube3D::Create(color));
 	}

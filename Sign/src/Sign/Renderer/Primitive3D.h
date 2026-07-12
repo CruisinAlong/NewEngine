@@ -23,8 +23,7 @@ namespace Sign {
 		{
 		public:
 			static std::shared_ptr<Mesh> Create(
-				const std::array<Vector3D,8>& color = {{
-					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
+				const std::array<Vector3D,6>& color = {{
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f}}}

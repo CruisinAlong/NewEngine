@@ -3,6 +3,8 @@ struct PixelShaderInput
     float4 Color : COLOR;
     float4 Position : SV_Position;
     float4 LocalPosition : TEXCOORD0;
+    nointerpolation uint FaceID : FACEID;
+
 };
 
 struct EntityID
@@ -27,15 +29,15 @@ struct PixelShaderOutput
     int2 IDs : SV_Target1;
 };
 
-PixelShaderOutput main(PixelShaderInput IN, uint primID : SV_PrimitiveID)
+PixelShaderOutput main(PixelShaderInput IN)
 {
     PixelShaderOutput OUT;
     float4 baseColor = IN.Color;
-    bool SelectedFace = (EntityIDCB.entityID == SelectedEntityCB.selectedEntityID) && (primID == SelectedFaceCB.selectedFaceID);
+    bool SelectedFace = (EntityIDCB.entityID == SelectedEntityCB.selectedEntityID) && (IN.FaceID == SelectedFaceCB.selectedFaceID);
     if (SelectedFace)
         baseColor = float4(1.0, 0.85, 0.1, 1.0);
     OUT.Color = baseColor;
-    OUT.IDs = int2(EntityIDCB.entityID, (int) primID);
+    OUT.IDs = int2(EntityIDCB.entityID, (int) IN.FaceID);
     return OUT;
 }
 

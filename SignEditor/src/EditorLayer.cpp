@@ -23,12 +23,12 @@ namespace Sign {
 		/*************** ECS VERSION ********************/
 		m_ActiveScene = std::make_shared<Scene>();
 
-		auto CubeECS = m_ActiveScene->CreateEntity();
+		auto CubeECS = m_ActiveScene->CreateEntity("Cube1");
 		CubeECS.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
 		auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
 		CubeTransform.Translation = { 5.0f,0.0f,5.0f };
 
-		auto CubeECS2 = m_ActiveScene->CreateEntity();
+		auto CubeECS2 = m_ActiveScene->CreateEntity("Cube2");
 		CubeECS2.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
 		auto& CubeTransform2 = CubeECS2.GetComponent<TransformComponent>();
 		CubeTransform2.Translation = { -5.0f,0.0f,5.0f };
@@ -284,7 +284,7 @@ namespace Sign {
 		
 
 		/*******ECS********/
-		m_ActiveScene->RenderScene();
+		m_ActiveScene->RenderScene(m_SelectedEntity ? m_SelectedEntity.GetID() : INVALID_ENTITY_ID, m_SelectedFaceID);
 		/*****************/
 
 
@@ -296,8 +296,9 @@ namespace Sign {
 
 		if (m_PickRequest) {
 			PixelData pixelData = m_FrameBuffer->ReadPixel(1,(int)m_PickCoords.x, (int)m_PickCoords.y);
-			std::println("Pixel Data: {}", pixelData.entityID);
+
 			if (pixelData.entityID == -1) {
+				std::println("Pixel Data: {}", pixelData.entityID);
 				m_SelectedEntity = EntityECS();
 				m_SelectedFaceID = -1;
 			}
@@ -305,7 +306,7 @@ namespace Sign {
 				EntityID id = (uint32_t)pixelData.entityID;
 				m_SelectedEntity = EntityECS(id, m_ActiveScene.get());
 				m_SelectedFaceID = pixelData.faceID;
-				std::println("Entity: {}", m_SelectedEntity.GetID());
+				std::println("Entity: {}", m_SelectedEntity.GetName());
 				std::println("FaceID: {}", m_SelectedFaceID);
 			}
 			m_PickRequest = false;
@@ -393,12 +394,16 @@ namespace Sign {
 
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportHovered);
-		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+		
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 		UINT64 coloraAttachment = m_FrameBuffer->GetTextureID();
 		ImGui::Image((ImTextureID)coloraAttachment, ImVec2(m_ViewportSize.x, m_ViewportSize.y));
+
+		ImVec2 ImageMin = ImGui::GetItemRectMin();
+		ImVec2 ImageMax = ImGui::GetItemRectMax();
+		m_ViewportBounds[0] = { ImageMin.x, ImageMin.y };
+		m_ViewportBounds[1] = { ImageMax.x, ImageMax.y };
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
@@ -469,13 +474,15 @@ namespace Sign {
 			my -= m_ViewportBounds[0].y;
 
 			Vector2D viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-			my = viewportSize.y - my;
+			
 			int mouseX = (int)mx;
 			int mouseY = (int)my;
 
 			
 			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y) {
-				
+				std::println("mx: {}, my: {}, viewportSize: {}x{}, framebuffer: {}x{}",
+					mx, my, viewportSize.x, viewportSize.y,
+					m_FrameBuffer->GetSpecifications().m_Width, m_FrameBuffer->GetSpecifications().m_Height);
 				m_PickCoords.x = mouseX;
 				m_PickCoords.y = mouseY;
 

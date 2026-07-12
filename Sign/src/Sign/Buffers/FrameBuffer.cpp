@@ -156,9 +156,12 @@ namespace Sign {
 			cmdList,
 			attachment.m_Resource,
 			attachment.m_CurrentState,
-			D3D12_RESOURCE_STATE_COPY_SOURCE
+			D3D12_RESOURCE_STATE_COMMON
 		);
-		attachment.m_CurrentState = D3D12_RESOURCE_STATE_COPY_SOURCE;
+		attachment.m_CurrentState = D3D12_RESOURCE_STATE_COMMON;
+		Renderer::CPUSyncToGPU();
+		Renderer::SetCommandlist();
+		
 
 		const UINT rowPitch = 256;
 
@@ -172,6 +175,9 @@ namespace Sign {
 				);
 		}
 
+		auto commandQueue = Renderer::GetContext()->GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+		auto copyList = commandQueue->GetCommandList();
+	
 		D3D12_TEXTURE_COPY_LOCATION src = {};
 		src.pResource = attachment.m_Resource.Get();
 		src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
@@ -187,12 +193,15 @@ namespace Sign {
 		dst.PlacedFootprint.Footprint.RowPitch = rowPitch;
 
 		D3D12_BOX srcBox = { (UINT)x, (UINT)y,0,(UINT)x + 1,(UINT)y + 1,1 };
-		cmdList->CopyTextureRegion(&dst, 0, 0, 0, &src, &srcBox);
+		copyList->CopyTextureRegion(&dst, 0, 0, 0, &src, &srcBox);
 
-		D3D12Utils::TransitionResource(cmdList, attachment.m_Resource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		auto fenceValue = commandQueue->ExecuteCommandList(copyList);
+		commandQueue->WaitForFenceValue(fenceValue);
+
+		cmdList = Renderer::GetCommandList();
+		D3D12Utils::TransitionResource(cmdList, attachment.m_Resource, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		attachment.m_CurrentState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-		Renderer::GetContext()->FlushCommandQueue();
 
 		PixelData result;
 		D3D12_RANGE readRange = { 0, sizeof(int32_t) * 2};

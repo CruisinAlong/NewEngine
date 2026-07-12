@@ -25,7 +25,7 @@ namespace Sign {
         m_Registry.DestroyEntity(entity.GetID());
     }
 
-    void Scene::RenderScene()
+    void Scene::RenderScene(EntityID selectedEntity, uint32_t selectedFaceID)
     {
         auto& meshPool = m_Registry.GetPool<MeshRendererComponent>();
 
@@ -42,7 +42,9 @@ namespace Sign {
                 renderer.Mesh->GetVertexArray(),
                 *renderer.Shader,
                 component->GetTransform(),
-                entity
+                entity,
+                selectedEntity,
+                selectedFaceID
             );
         }
     }

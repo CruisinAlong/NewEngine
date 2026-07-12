@@ -63,6 +63,19 @@ namespace Sign
 
 		s_Data->m_CommandList->RSSetViewports(1, &s_Data->m_Viewport);
 		s_Data->m_CommandList->RSSetScissorRects(1, &s_Data->m_ScissorsRect);
+
+		auto rtv = s_Data->m_Context->GetCurrentTargetView();
+		auto dsv = s_Data->m_Context->GetDSVDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
+		auto backBuffer = s_Data->m_Context->GetBackBuffer(s_Data->m_Context->GetCurrentBackBuffer());
+		FLOAT depth = 1.0f;
+		//Clear
+		{
+			D3D12Utils::TransitionResource(
+				s_Data->m_CommandList,
+				backBuffer,
+				D3D12_RESOURCE_STATE_PRESENT,
+				D3D12_RESOURCE_STATE_RENDER_TARGET);
+		}
 	}
 
 	void Renderer::RenderClearCommand(FLOAT* clearColor)
@@ -108,6 +121,25 @@ namespace Sign
 
 		auto model = Mat4::transpose(transform);
 		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(1, sizeof(Mat4) / 4, &model, 0);
+
+		vertexArray->Bind(s_Data->m_CommandList);
+
+
+		s_Data->m_CommandList->DrawIndexedInstanced(vertexArray->GetIndexBufferCount(), 1, 0, 0, 0);
+	}
+
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform, uint32_t entity)
+	{
+		shader.Bind(s_Data->m_CommandList);
+		ID3D12DescriptorHeap* heaps[] = { s_Data->m_Context->Get_CBV_SRV_UAV_DescriptorHeap().Get() };
+		s_Data->m_CommandList->SetDescriptorHeaps(_countof(heaps), heaps);
+
+
+		s_Data->m_CommandList->SetGraphicsRootDescriptorTable(0, s_Data->m_Context->GetGPUHandleAt(s_Data->m_Context->GetCurrentBackBuffer()));
+
+		auto model = Mat4::transpose(transform);
+		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(1, sizeof(Mat4) / 4, &model, 0);
+		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(2, 1, &entity, 0);
 
 		vertexArray->Bind(s_Data->m_CommandList);
 

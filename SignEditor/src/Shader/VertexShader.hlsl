@@ -12,6 +12,7 @@ struct ModelTransform
 ConstantBuffer<PerFrame> PerFrameCB : register(b0);
 ConstantBuffer<ModelTransform> ModelTransformCB : register(b1);
 
+
 struct VertexPosColor
 {
     float4 Position : POSITION;

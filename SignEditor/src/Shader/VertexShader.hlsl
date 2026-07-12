@@ -17,6 +17,7 @@ struct VertexPosColor
 {
     float4 Position : POSITION;
     float4 Color : COLOR;
+    uint FaceID : FACEID;
 };
 
 struct VertexShaderOutput
@@ -24,6 +25,7 @@ struct VertexShaderOutput
     float4 Color : COLOR;
     float4 Position : SV_Position;
     float4 LocalPosition : TEXCOORD0;
+    nointerpolation uint FaceID : FACEID;
 };
 
 VertexShaderOutput main(VertexPosColor IN)
@@ -35,5 +37,6 @@ VertexShaderOutput main(VertexPosColor IN)
     OUT.LocalPosition = IN.Position;
     OUT.Position = mul(viewPos, PerFrameCB.projectionMatrix);
     OUT.Color = IN.Color;
+    OUT.FaceID = IN.FaceID;
     return OUT;
 }

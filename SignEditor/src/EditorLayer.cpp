@@ -34,6 +34,12 @@ namespace Sign {
 		CubeECS2.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
 		auto& CubeTransform2 = CubeECS2.GetComponent<TransformComponent>();
 		CubeTransform2.Translation = { -5.0f,0.0f,5.0f };
+
+		auto Plane = m_ActiveScene->CreateEntity("Plane");
+		Plane.AddComponent<MeshRendererComponent>(Primitive::Plane::Create());
+		auto& PlaneTransform = Plane.GetComponent<TransformComponent>();
+		PlaneTransform.Scale = { 5.0f,0.0f,5.0f };
+		PlaneTransform.Translation = { 0.0f,-0.5f,0.0f };
 		/***********************************************/
 
 		/*************** OOP VERSION ********************/

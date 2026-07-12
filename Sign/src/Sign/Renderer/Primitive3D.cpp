@@ -2,45 +2,70 @@
 
 namespace Sign {
 	namespace Primitive {
+
+		void Sphere::AddIndices(std::vector<WORD>& indices, int i1, int i2, int i3)
+		{
+			indices.push_back((WORD)i1);
+			indices.push_back((WORD)i2);
+			indices.push_back((WORD)i3);
+		}
+
+		void Sphere::Interpolate(const float* v1, const float* v2, float t, float radius, float* out)
+		{
+			float x = v1[0] + (v2[0] - v1[0]) * t;
+			float y = v1[1] + (v2[1] - v1[1]) * t;
+			float z = v1[2] + (v2[2] - v1[2]) * t;
+			float len = std::sqrtf(x * x + y * y + z * z);
+			if (len <= 1e-6f) len = 1.0f;
+			float inv = radius / len;
+			out[0] = x * inv;
+			out[1] = y * inv;
+			out[2] = z * inv;
+		}
+
+		// --- existing primitive implementations follow ---
 		std::shared_ptr<Mesh> Cube3D::Create(const std::array<Vector3D, 6>& color)
 		{
+			std::vector<VertexPosColor> finalVertices;
+			std::vector<WORD> indices;
 
-			VertexPosColor CubeVertices[24] = {
-				//Back Face
-				{cubePosition[0], color[0],0}, {cubePosition[1], color[0],0},{cubePosition[2],color[0],0}, {cubePosition[3], color[0],0},
-				//Front Face
-				{cubePosition[4], color[1],1}, {cubePosition[5],color[1],1}, {cubePosition[6],color[1],1}, {cubePosition[7], color[1],1},
-				//Left Face
-				{cubePosition[0], color[2],2}, {cubePosition[1],color[2],2}, {cubePosition[5],color[2],2}, {cubePosition[4], color[2],2},
-				//Right Face
-				{cubePosition[3], color[3],3}, {cubePosition[2],color[3],3}, {cubePosition[6],color[3],3}, {cubePosition[7], color[3],3},
-				//Top Face
-				{cubePosition[1], color[4],4}, {cubePosition[5],color[4],4}, {cubePosition[6],color[4],4}, {cubePosition[2], color[4],4},
-				//Bottom Face
-				{cubePosition[0], color[5],5}, {cubePosition[4],color[5],5}, {cubePosition[7],color[5],5}, {cubePosition[3], color[5],5}
-			};
+			const int triCount = _countof(cubeIndices) / 3;
+			finalVertices.reserve(triCount * 3);
+			indices.reserve(triCount * 3);
 
+			for (int t = 0; t < triCount; ++t) {
+				uint32_t faceID = (uint32_t)(t / 2);
+				for (int j = 0; j < 3; ++j) {
+					WORD src = cubeIndices[t * 3 + j];
+					VertexPosColor v;
+					v.Position = cubePosition[src];
+					v.Color = color[faceID % 6];
+					v.FaceID = faceID;
+					finalVertices.push_back(v);
+					indices.push_back((WORD)(finalVertices.size() - 1));
+				}
+			}
 
-			return std::make_shared<Mesh>(CubeVertices, _countof(CubeVertices), cubeIndices, _countof(cubeIndices));
+			return std::make_shared<Mesh>(finalVertices.data(), (uint32_t)finalVertices.size(), indices.data(), (uint32_t)indices.size());
 		}
 
 		std::shared_ptr<Mesh> Cylinder::Create(float radius, float height, int segments, const Vector3D& Color)
 		{
 			if (segments < 3) segments = 3;
-			std::vector<VertexPosColor> vertices;
-			std::vector<WORD> indices;
+			std::vector<float> rawVerts;
+			std::vector<WORD> srcIndices;
 
 			float half = height * 0.5f;
 
 			// Top center
-			vertices.push_back({ Vector3D(0.0f, half, 0.0f), Color });
+			rawVerts.push_back(0.0f); rawVerts.push_back(half); rawVerts.push_back(0.0f);
 
 			// Top ring
 			for (int i = 0; i < segments; i++) {
 				float angle = (MathUtils::PI * 2.0f * i) / (float)segments;
 				float x = radius * std::cosf(angle);
 				float z = radius * std::sinf(angle);
-				vertices.push_back({ Vector3D(x, half, z), Color });
+				rawVerts.push_back(x); rawVerts.push_back(half); rawVerts.push_back(z);
 			}
 
 			// Bottom ring
@@ -48,52 +73,91 @@ namespace Sign {
 				float angle = (MathUtils::PI * 2.0f * i) / (float)segments;
 				float x = radius * std::cosf(angle);
 				float z = radius * std::sinf(angle);
-				vertices.push_back({ Vector3D(x, -half, z), Color });
+				rawVerts.push_back(x); rawVerts.push_back(-half); rawVerts.push_back(z);
 			}
 
 			// Bottom center
-			vertices.push_back({ Vector3D(0.0f, -half, 0.0f), Color });
+			rawVerts.push_back(0.0f); rawVerts.push_back(-half); rawVerts.push_back(0.0f);
 
 			const WORD topCenterIndex = 0;
 			const WORD topStart = 1;
 			const WORD bottomStart = (WORD)(1 + segments);
-			const WORD bottomCenterIndex = (WORD)(vertices.size() - 1);
+			const WORD bottomCenterIndex = (WORD)(rawVerts.size() / 3 - 1);
 
+			// Build a src index list in the same order as previous logic
 			// Top fan
 			for (int i = 0; i < segments; i++) {
-				indices.push_back(topCenterIndex);
-				indices.push_back((WORD)(topStart + i));
-				indices.push_back((WORD)(topStart + ((i + 1) % segments)));
+				srcIndices.push_back(topCenterIndex);
+				srcIndices.push_back((WORD)(topStart + i));
+				srcIndices.push_back((WORD)(topStart + ((i + 1) % segments)));
 			}
 
 			// Side quads (two triangles each)
 			for (int i = 0; i < segments; i++) {
 				int next = (i + 1) % segments;
-
-				// triangle 1: top(i), bottom(i), top(next)
-				indices.push_back((WORD)(topStart + i));
-				indices.push_back((WORD)(bottomStart + i));
-				indices.push_back((WORD)(topStart + next));
-
-				// triangle 2: top(next), bottom(i), bottom(next)
-				indices.push_back((WORD)(topStart + next));
-				indices.push_back((WORD)(bottomStart + i));
-				indices.push_back((WORD)(bottomStart + next));
+				// triangle 1
+				srcIndices.push_back((WORD)(topStart + i));
+				srcIndices.push_back((WORD)(bottomStart + i));
+				srcIndices.push_back((WORD)(topStart + next));
+				// triangle 2
+				srcIndices.push_back((WORD)(topStart + next));
+				srcIndices.push_back((WORD)(bottomStart + i));
+				srcIndices.push_back((WORD)(bottomStart + next));
 			}
 
-			// Bottom fan (winding to match top)
+			// Bottom fan
 			for (int i = 0; i < segments; i++) {
-				indices.push_back(bottomCenterIndex);
-				indices.push_back((WORD)(bottomStart + ((i + 1) % segments)));
-				indices.push_back((WORD)(bottomStart + i));
+				srcIndices.push_back(bottomCenterIndex);
+				srcIndices.push_back((WORD)(bottomStart + ((i + 1) % segments)));
+				srcIndices.push_back((WORD)(bottomStart + i));
 			}
 
-			return std::make_shared<Mesh>(vertices.data(), (uint32_t)vertices.size(), indices.data(), (uint32_t)indices.size());
+			// Expand into per-triangle vertices and assign FaceIDs:
+			// top triangles -> faceID = 1
+			// side triangles -> assign one faceID per segment (so sides are selectable per segment)
+			// bottom triangles -> faceID = 2
+			std::vector<VertexPosColor> finalVertices;
+			std::vector<WORD> finalIndices;
+			finalVertices.reserve(srcIndices.size());
+			finalIndices.reserve(srcIndices.size());
+
+			int triTotal = (int)srcIndices.size() / 3;
+			for (int t = 0; t < triTotal; ++t) {
+				uint32_t faceID;
+				if (t < segments) {
+					faceID = 1; // top
+				}
+				else if (t < segments + 2 * segments) {
+					// side triangles - map each quad (2 tris) to one faceID
+					int sideTriIndex = t - segments; // 0..(2*segments-1)
+					int segmentIndex = sideTriIndex / 2; // same for both tris of the quad
+					faceID = 3u + (uint32_t)segmentIndex; // reserve 1/2 for top/bottom (1 and 2); sides start at 3
+				}
+				else {
+					faceID = 2; // bottom
+				}
+
+				for (int j = 0; j < 3; ++j) {
+					WORD vIdx = srcIndices[t * 3 + j];
+					VertexPosColor v;
+					v.Position = {
+						rawVerts[vIdx * 3 + 0],
+						rawVerts[vIdx * 3 + 1],
+						rawVerts[vIdx * 3 + 2]
+					};
+					v.Color = Color;
+					v.FaceID = faceID;
+					finalVertices.push_back(v);
+					finalIndices.push_back((WORD)(finalVertices.size() - 1));
+				}
+			}
+
+			return std::make_shared<Mesh>(finalVertices.data(), (uint32_t)finalVertices.size(), finalIndices.data(), (uint32_t)finalIndices.size());
 		}
 
 		std::shared_ptr<Mesh> Sphere::Create(const Vector3D& Color)
 		{
-			//Iconosphere
+
 			const float H_ANGLE = MathUtils::ConvertToRadians(72.0f);
 			const float V_ANGLE = std::atanf(1.0f / 2.0f);
 			float radius = 1.0f;
@@ -209,81 +273,140 @@ namespace Sign {
 				}
 
 			}
-			std::vector<VertexPosColor> finalVertices;
-			for (int i = 0; i < (int)vertices.size(); i += 3) {
-				VertexPosColor v;
-				v.Position = { vertices[i],vertices[i + 2], vertices[i + 1] };
-				v.Color = Color;
-				finalVertices.push_back(v);
+
+			// Expand indices -> per-triangle vertices and assign FaceIDs sequentially
+			std::vector<VertexPosColor> finalVerts;
+			std::vector<WORD> finalIdx;
+			finalVerts.reserve(indices.size());
+			finalIdx.reserve(indices.size());
+
+			int triCount = (int)indices.size() / 3;
+			for (int t = 0; t < triCount; ++t) {
+				uint32_t faceID = (uint32_t)t; // keep per-triangle id (or group if desired)
+				for (int j = 0; j < 3; ++j) {
+					WORD src = indices[t * 3 + j];
+					VertexPosColor v;
+					v.Position = { vertices[src * 3 + 0], vertices[src * 3 + 1], vertices[src * 3 + 2] };
+					v.Color = Color;
+					v.FaceID = faceID;
+					finalVerts.push_back(v);
+					finalIdx.push_back((WORD)(finalVerts.size() - 1));
+				}
 			}
 
-			return std::make_shared<Mesh>(finalVertices.data(), (uint32_t)finalVertices.size(), indices.data(), (uint32_t)indices.size());
-		}
-		void Sphere::AddIndices(std::vector<WORD>& indices, int i1, int i2, int i3)
-		{
-			indices.push_back(i1);
-			indices.push_back(i2);
-			indices.push_back(i3);
-		}
-		void Sphere::Interpolate(const float* v1, const float* v2, float t, float radius, float* out)
-		{
-			out[0] = v1[0] + (v2[0] - v1[0]) * t;
-			out[1] = v1[1] + (v2[1] - v1[1]) * t;
-			out[2] = v1[2] + (v2[2] - v1[2]) * t;
-
-			float len = std::sqrt(out[0] * out[0] + out[1] * out[1] + out[2] * out[2]);
-			out[0] = out[0] / len * radius;
-			out[1] = out[1] / len * radius;
-			out[2] = out[2] / len * radius;
+			std::vector<VertexPosColor> finalVerticesToUse;
+			return std::make_shared<Mesh>(finalVerts.data(), (uint32_t)finalVerts.size(), finalIdx.data(), (uint32_t)finalIdx.size());
 		}
 
-		// Stairs: each step is a slab between previous depth and current depth.
-		// Bottom of every slab is y = 0; top increases per step so the overall silhouette is a staircase.
+		// Stairs: produce per-triangle vertices and distinct FaceIDs for each step/face
 		std::shared_ptr<Mesh> Stairs::Create(int steps, float stepWidth, float stepHeight, float depthPerStep, const Vector3D& Color)
 		{
+			// Debug: print parameters
+			std::println("Stairs::Create params: steps={}, stepWidth={}, stepHeight={}, depthPerStep={}", steps, stepWidth, stepHeight, depthPerStep);
+
 			if (steps < 1) steps = 1;
-			std::vector<VertexPosColor> vertices;
-			std::vector<WORD> indices;
+			std::vector<VertexPosColor> finalVertices;
+			std::vector<WORD> finalIndices;
 
 			float halfW = stepWidth * 0.5f;
 
-			for (int i = 0; i < steps; ++i)
+			// Index mapping for an 8-vertex box (per-step)
+			static const WORD cubeIndices8[36] = {
+				// front (0,1,2,3)
+				0,1,2, 0,2,3,
+				// back (4,7,6,5)
+				4,7,6, 4,6,5,
+				// top (1,5,6,2)
+				1,5,6, 1,6,2,
+				// bottom (0,3,7,4)
+				0,3,7, 0,7,4,
+				// left (0,4,5,1)
+				0,4,5, 0,5,1,
+				// right (3,2,6,3->7)
+				3,2,6, 3,6,7
+			};
+
+			for (int s = 0; s < steps; ++s)
 			{
-				// front is the inner face of this step, back is the outer face
-				float frontZ = -i * depthPerStep;
-				float backZ = -(i + 1) * depthPerStep;
-				float height = (i + 1) * stepHeight;
+				float frontZ = -s * depthPerStep;
+				float backZ = -(s + 1) * depthPerStep;
+				float height = (s + 1) * stepHeight;
+
+				// Debug: per-step geometry
+				std::println(" Stairs step {}: frontZ={}, backZ={}, height={}", s, frontZ, backZ, height);
 
 				VertexPosColor box[8] = {
-					{ Vector3D(-halfW, 0.0f,  frontZ), Color }, // 0 front-bottom-left
-					{ Vector3D(-halfW, height, frontZ), Color }, // 1 front-top-left
-					{ Vector3D( halfW, height, frontZ), Color }, // 2 front-top-right
-					{ Vector3D( halfW, 0.0f,  frontZ), Color }, // 3 front-bottom-right
-					{ Vector3D(-halfW, 0.0f,  backZ), Color },  // 4 back-bottom-left
-					{ Vector3D(-halfW, height, backZ), Color }, // 5 back-top-left
-					{ Vector3D( halfW, height, backZ), Color }, // 6 back-top-right
-					{ Vector3D( halfW, 0.0f,  backZ), Color }   // 7 back-bottom-right
+					{ Vector3D(-halfW, 0.0f,  frontZ), Color, 0 },
+					{ Vector3D(-halfW, height, frontZ), Color, 0 },
+					{ Vector3D(halfW, height, frontZ), Color, 0 },
+					{ Vector3D(halfW, 0.0f,  frontZ), Color, 0 },
+					{ Vector3D(-halfW, 0.0f,  backZ), Color, 0 },
+					{ Vector3D(-halfW, height, backZ), Color, 0 },
+					{ Vector3D(halfW, height, backZ), Color, 0 },
+					{ Vector3D(halfW, 0.0f,  backZ), Color, 0 }
 				};
 
-				WORD baseIndex = (WORD)vertices.size();
-				for (int v = 0; v < 8; ++v)
-					vertices.push_back(box[v]);
-
-				for (size_t k = 0; k < _countof(cubeIndices); ++k)
-					indices.push_back((WORD)(baseIndex + cubeIndices[k]));
+				// For each triangle, create independent vertices with FaceID
+				const int triCount = 12; // 6 faces * 2 triangles
+				for (int t = 0; t < triCount; ++t) {
+					uint32_t faceID = (uint32_t)(s * 6 + (t / 2)); // assign one faceID per face (two triangles)
+					// Debug: print faceID for each face (once per triangle pair)
+					if ((t % 2) == 0) {
+						std::println("  Step {} face {} assigned faceID={}", s, t / 2, faceID);
+					}
+					for (int j = 0; j < 3; ++j) {
+						WORD src = cubeIndices8[t * 3 + j];
+						VertexPosColor v;
+						v.Position = box[src].Position;
+						v.Color = box[src].Color;
+						v.FaceID = faceID;
+						finalVertices.push_back(v);
+						finalIndices.push_back((WORD)(finalVertices.size() - 1));
+					}
+				}
 			}
 
-			return std::make_shared<Mesh>(vertices.data(), (uint32_t)vertices.size(), indices.data(), (uint32_t)indices.size());
+			// Debug: totals and per-step verification
+			const size_t verts = finalVertices.size();
+			const size_t inds = finalIndices.size();
+			const size_t expectedPerStepVerts = 12 * 3; // triangles * 3 vertices
+			std::println("Stairs generation complete: verts={}, inds={}, expectedPerStepVerts={}, expectedTotalVerts={}", verts, inds, expectedPerStepVerts, expectedPerStepVerts * steps);
+
+			// Print faceIDs found per step to verify uniqueness and coverage
+			for (int s = 0; s < steps; ++s) {
+				size_t start = s * expectedPerStepVerts;
+				size_t end = start + expectedPerStepVerts;
+				std::println(" Step {} vertex range: [{}..{})", s, start, end);
+				// print unique faceIDs for this step
+				for (size_t i = start; i < end; ++i) {
+					if (i >= verts) break;
+					std::println("  vertex {} faceID={}", i, finalVertices[i].FaceID);
+				}
+			}
+
+			return std::make_shared<Mesh>(finalVertices.data(), (uint32_t)finalVertices.size(), finalIndices.data(), (uint32_t)finalIndices.size());
 		}
 
 		std::shared_ptr<Mesh> Plane::Create(const std::array<Vector3D, 4>& color)
 		{
-			VertexPosColor planeVertices[4];
+			// Expand quad into 2 triangles and set faceID = 0
+			std::vector<VertexPosColor> finalVertices;
+			std::vector<WORD> indices;
 
-			for (size_t i = 0; i < 4; i++) {
-				planeVertices[i] = { planePosition[i], color[i],0 };
+			for (int t = 0; t < 2; ++t) {
+				uint32_t faceID = 0;
+				for (int j = 0; j < 3; ++j) {
+					WORD src = quadIndices[t * 3 + j];
+					VertexPosColor v;
+					v.Position = planePosition[src];
+					v.Color = color[src % color.size()];
+					v.FaceID = faceID;
+					finalVertices.push_back(v);
+					indices.push_back((WORD)(finalVertices.size() - 1));
+				}
 			}
-			return std::make_shared<Mesh>(planeVertices, _countof(planeVertices), quadIndices, _countof(quadIndices));
+
+			return std::make_shared<Mesh>(finalVertices.data(), (uint32_t)finalVertices.size(), indices.data(), (uint32_t)indices.size());
 		}
 	}
 }

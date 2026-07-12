@@ -7,11 +7,19 @@
 #include "Sign/Math/SignMath.h"
 namespace Sign {
 	namespace Primitive {
-		static const std::array<Vector3D, 8> cubePosition = { {
-			{-0.5,-0.5,-0.5} , {-0.5,0.5,-0.5 },
-			{ 0.5,0.5,-0.5 } , { 0.5,-0.5,-0.5 },
-			{ -0.5,-0.5,0.5 }, { -0.5,0.5,0.5 },
-			{ 0.5,0.5,0.5 }  , { 0.5,-0.5,0.5 }
+		static const std::array<Vector3D, 24> cubePosition = { {
+			// Front face (indices 0-3)
+			{-0.5f, -0.5f, -0.5f}, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, -0.5f}, {0.5f, -0.5f, -0.5f},
+			// Back face (indices 4-7)
+			{-0.5f, -0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {0.5f, -0.5f, 0.5f},
+			// Top face (indices 8-11)
+			{-0.5f, 0.5f, -0.5f}, {-0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, -0.5f},
+			// Bottom face (indices 12-15)
+			{-0.5f, -0.5f, -0.5f}, {-0.5f, -0.5f, 0.5f}, {0.5f, -0.5f, 0.5f}, {0.5f, -0.5f, -0.5f},
+			// Left face (indices 16-19)
+			{-0.5f, -0.5f, -0.5f}, {-0.5f, -0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f, -0.5f},
+			// Right face (indices 20-23)
+			{0.5f, -0.5f, -0.5f}, {0.5f, -0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, -0.5f}
 		} };
 		static const std::array<Vector3D, 4> planePosition = { {
 			{-0.5,0.0,0.5 } ,

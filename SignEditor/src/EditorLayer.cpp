@@ -134,28 +134,34 @@ namespace Sign {
 		for (auto& pending : m_PendingMeshes) {
 			const float spawnDistance = 5.0f;
 			Vector3D spawnPos = m_EditorCamera.GetPosition() + m_EditorCamera.GetForwardDirection() * spawnDistance;
+			std::println("[EditorLayer] Processing pending mesh: {}", (int)pending);
 			auto entity = m_ActiveScene->CreateEntity();
 			switch (pending) {
 			case PrimitiveType::Cube:
+				std::println("[EditorLayer] Creating Cube primitive");
 				entity.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
 				break;
 			case PrimitiveType::Plane:
+				std::println("[EditorLayer] Creating Plane primitive");
 				entity.AddComponent<MeshRendererComponent>(Primitive::Plane::Create());
 				break;
 			case PrimitiveType::Cylinder:
+				std::println("[EditorLayer] Creating Cylinder primitive");
 				entity.AddComponent<MeshRendererComponent>(Primitive::Cylinder::Create());
 				break;
 			case PrimitiveType::Sphere:
+				std::println("[EditorLayer] Creating Sphere primitive");
 				entity.AddComponent<MeshRendererComponent>(Primitive::Sphere::Create());
 				break;
 			case PrimitiveType::Stairs:
+				std::println("[EditorLayer] Creating Stairs primitive (calling Primitive::Stairs::Create)");
 				entity.AddComponent<MeshRendererComponent>(Primitive::Stairs::Create());
 				break;
 			default:
+				std::println("[EditorLayer] Unknown pending primitive {}", (int)pending);
 				break;
 			}
 			entity.GetComponent<TransformComponent>().Translation = spawnPos;
-			// TODO: push an EditorCommand that wraps ECS creation if you want undo/redo support
 		}
 		m_PendingMeshes.clear();
 

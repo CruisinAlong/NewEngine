@@ -18,7 +18,7 @@ namespace Sign {
 		Registry& GetRegistry() { return m_Registry; }
 	//Make render Scene private in the FUTURE
 	public:
-		void RenderScene();
+		void RenderScene(EntityID selectedEntity, uint32_t selectedFaceID);
 	private:
 		Registry m_Registry;
 		friend class EntityECS;

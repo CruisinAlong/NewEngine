@@ -25,12 +25,13 @@ namespace Sign {
 		static void								ShutDown();
 		static void								BeginInitializationCommand();
 		static void								EndInitializationCommand();
+		static void								SetCommandlist(D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT);
 
 		static void								BeginFrame();
 		static void								RenderClearCommand(FLOAT* clearColor);
 		static void								BeginScene(const PerspectiveCamera& camera);
 		static void								Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform);
-		static void								Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform, uint32_t entity);
+		static void								Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform, uint32_t entity, uint32_t selectedEntityID, uint32_t selectedFace);
 		static void								EndScene();
 
 		static void								OnWindowResize(uint32_t width, uint32_t height);

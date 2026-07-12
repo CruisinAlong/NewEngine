@@ -9,7 +9,17 @@ struct EntityID
 {
     uint entityID;
 };
+struct SelectedEntity
+{
+    uint selectedEntityID;
+};
+struct SelectedFace
+{
+    uint selectedFaceID;
+};
 ConstantBuffer<EntityID> EntityIDCB : register(b2);
+ConstantBuffer<SelectedEntity> SelectedEntityCB : register(b3);
+ConstantBuffer<SelectedFace> SelectedFaceCB : register(b4);
 
 struct PixelShaderOutput
 {
@@ -20,7 +30,11 @@ struct PixelShaderOutput
 PixelShaderOutput main(PixelShaderInput IN, uint primID : SV_PrimitiveID)
 {
     PixelShaderOutput OUT;
-    OUT.Color = IN.Color;
+    float4 baseColor = IN.Color;
+    bool SelectedFace = (EntityIDCB.entityID == SelectedEntityCB.selectedEntityID) && (primID == SelectedFaceCB.selectedFaceID);
+    if (SelectedFace)
+        baseColor = float4(1.0, 0.85, 0.1, 1.0);
+    OUT.Color = baseColor;
     OUT.IDs = int2(EntityIDCB.entityID, (int) primID);
     return OUT;
 }

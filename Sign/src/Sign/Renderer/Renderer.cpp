@@ -55,6 +55,12 @@ namespace Sign
 		s_Data->m_CommandList = nullptr;
 	}
 
+	void Renderer::SetCommandlist(D3D12_COMMAND_LIST_TYPE type)
+	{
+		auto CommandQueue = s_Data->m_Context->GetCommandQueue(type);
+		s_Data->m_CommandList = CommandQueue->GetCommandList();
+	}
+
 	void Renderer::BeginFrame()
 	{
 		s_Data->m_Context->Get_CBV_SRV_UAV_Allocator().ProcessDeferredFrees();
@@ -128,7 +134,7 @@ namespace Sign
 		s_Data->m_CommandList->DrawIndexedInstanced(vertexArray->GetIndexBufferCount(), 1, 0, 0, 0);
 	}
 
-	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform, uint32_t entity)
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& vertexArray, const Shader& shader, const Mat4& transform, uint32_t entity, uint32_t selectedEntityID, uint32_t selectedFace)
 	{
 		shader.Bind(s_Data->m_CommandList);
 		ID3D12DescriptorHeap* heaps[] = { s_Data->m_Context->Get_CBV_SRV_UAV_DescriptorHeap().Get() };
@@ -140,6 +146,8 @@ namespace Sign
 		auto model = Mat4::transpose(transform);
 		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(1, sizeof(Mat4) / 4, &model, 0);
 		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(2, 1, &entity, 0);
+		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(3, 1, &selectedEntityID, 0);
+		s_Data->m_CommandList->SetGraphicsRoot32BitConstants(4, 1, &selectedFace, 0);
 
 		vertexArray->Bind(s_Data->m_CommandList);
 

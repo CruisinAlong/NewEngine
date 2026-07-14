@@ -38,6 +38,15 @@ namespace Sign {
 		auto& PlaneTransform = Plane.GetComponent<TransformComponent>();
 		PlaneTransform.Scale = { 5.0f,0.0f,5.0f };
 		PlaneTransform.Translation = { 0.0f,-0.5f,0.0f };
+		int index = 0;
+		for (int i = 0; i < 100000; i++) {
+			
+			auto CubeECS = m_ActiveScene->CreateEntity("Cube" + std::to_string(index));
+			CubeECS.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
+			auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
+			CubeTransform.Translation = { MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f) };
+			index++;
+		}
 		/***********************************************/
 
 		/*************** OOP VERSION ********************/
@@ -197,7 +206,7 @@ namespace Sign {
 	/*	m_Meshes.push_back(plane);
 		m_InitialEntityCount++;*/
 
-		/*for (int i = 0; i < 50; i++) {
+		/*for (int i = 0; i < 5000; i++) {
 			auto Cube = std::make_shared<CubeEntity>();
 			Cube->SetTranslation({ MathUtils::Random_Float(-15.0f,15.0f),MathUtils::Random_Float(-15.0f,15.0f) ,MathUtils::Random_Float(-15.0f,15.0f) });
 			Cube->SetScale(Vector3D(0.5f, 0.5f, 0.5f));
@@ -205,7 +214,7 @@ namespace Sign {
 			m_InitialEntityCount++;
 		}*/
 
-		std::println("Entity Numbers: {}", m_Meshes.size());
+		std::println("Entity Numbers: {}", m_ActiveScene->GetRegistry().GetPool<TagComponent>().Size());
 	}
 
 	void EditorLayer::OnDettach()

@@ -28,11 +28,12 @@ namespace Sign {
     void Scene::RenderScene(EntityID selectedEntity, uint32_t selectedFaceID)
     {
         auto& meshPool = m_Registry.GetPool<MeshRendererComponent>();
+        auto& transform = m_Registry.GetPool<TransformComponent>();
 
         for (auto& renderer : meshPool) {
             EntityID entity = renderer.m_entity;
 
-            TransformComponent* component = m_Registry.GetComponent<TransformComponent>(entity);
+            TransformComponent* component = transform.Get(entity);
 
             if (!component)
                 continue;

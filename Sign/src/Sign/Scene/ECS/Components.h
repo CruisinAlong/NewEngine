@@ -15,7 +15,7 @@ namespace Sign {
 	template<typename T>
 	ComponentType GetComponentTypeID() {
 		static ComponentType typeID = GetNextComponentTypeID();
-		return typeID++;
+		return typeID;
 	}
 	struct TransformComponent {
 		Vector3D Translation = { 0.0f,0.0f,0.0f };

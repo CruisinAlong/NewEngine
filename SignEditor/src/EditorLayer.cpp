@@ -38,7 +38,7 @@ namespace Sign {
 		auto& PlaneTransform = Plane.GetComponent<TransformComponent>();
 		PlaneTransform.Scale = { 5.0f,0.0f,5.0f };
 		PlaneTransform.Translation = { 0.0f,-0.5f,0.0f };
-		int index = 0;
+	/*	int index = 0;
 		for (int i = 0; i < 100000; i++) {
 			
 			auto CubeECS = m_ActiveScene->CreateEntity("Cube" + std::to_string(index));
@@ -46,7 +46,7 @@ namespace Sign {
 			auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
 			CubeTransform.Translation = { MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f) };
 			index++;
-		}
+		}*/
 		/***********************************************/
 
 		/*************** OOP VERSION ********************/

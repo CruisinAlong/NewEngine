@@ -12,10 +12,15 @@ namespace Sign {
 		void SetSignature(EntityID entity, Signature signature);
 		Signature GetSignature(EntityID entity);
 
+		const std::vector<EntityID>& GetAliveEntities() const { return m_AliveEntities; }
+
 	private:
 		uint32_t m_NextEntityID = 0;
-		std::vector<EntityID> m_AvailableEntites;
+		std::vector<EntityID> m_AvailableEntities;
 		std::vector<Signature> m_Signatures;
+
+		std::vector<EntityID> m_AliveEntities;
+		std::unordered_map<EntityID, size_t> m_AliveIndex;
 	};
 
 }

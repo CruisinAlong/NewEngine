@@ -1,6 +1,6 @@
 #pragma once
 #include <Sign.h>
-
+#include "Sign/Scene/SceneHierarchy.h"
 
 namespace Sign {
 	class EditorLayer : public Layer
@@ -31,6 +31,7 @@ namespace Sign {
 		std::shared_ptr<Scene> m_ActiveScene;
 		EntityECS m_SelectedEntity;
 		int32_t m_SelectedFaceID;
+		SceneHierarchy m_SceneHierarchyPanel;
 
 
 		std::shared_ptr<Shader> m_Shader;

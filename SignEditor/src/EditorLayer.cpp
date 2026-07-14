@@ -38,15 +38,18 @@ namespace Sign {
 		auto& PlaneTransform = Plane.GetComponent<TransformComponent>();
 		PlaneTransform.Scale = { 5.0f,0.0f,5.0f };
 		PlaneTransform.Translation = { 0.0f,-0.5f,0.0f };
-	/*	int index = 0;
-		for (int i = 0; i < 100000; i++) {
-			
-			auto CubeECS = m_ActiveScene->CreateEntity("Cube" + std::to_string(index));
-			CubeECS.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
-			auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
-			CubeTransform.Translation = { MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f) };
-			index++;
-		}*/
+
+		//int index = 0;
+		//for (int i = 0; i < 10000; i++) {
+		//	
+		//	auto CubeECS = m_ActiveScene->CreateEntity("Cube" + std::to_string(index));
+		//	CubeECS.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
+		//	auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
+		//	CubeTransform.Translation = { MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f) };
+		//	index++;
+		//}
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		/***********************************************/
 
 		/*************** OOP VERSION ********************/
@@ -347,6 +350,20 @@ namespace Sign {
 		// Refocus our window to minimize perceived loss of focus when changing mode (caused by the fact that each use a different window, which would not happen in a real app)
 		if (opt_demo_mode_changed)
 			ImGui::SetNextWindowFocus();
+
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Edit"))
+			{
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
 		ImGui::Begin("Examples: Dockspace", &dockSpaceOpen, ImGuiWindowFlags_MenuBar);
 
 		opt_demo_mode_changed = false;
@@ -378,6 +395,7 @@ namespace Sign {
 			ImGui::CheckboxFlags("Flag: AutoHideTabBar", &args, ImGuiDockNodeFlags_AutoHideTabBar);
 		}
 
+		m_SceneHierarchyPanel.OnImGuiRender();
 		// Show demo options and help
 		if (ImGui::BeginMenuBar())
 		{

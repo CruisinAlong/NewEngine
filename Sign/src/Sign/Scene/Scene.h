@@ -22,6 +22,7 @@ namespace Sign {
 	private:
 		Registry m_Registry;
 		friend class EntityECS;
+		friend class SceneHierarchy;
 	};
 }
 

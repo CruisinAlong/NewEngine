@@ -247,8 +247,8 @@ namespace Sign {
 
 
 		
-
-		m_EditorCamera.OnUpdate(dt);
+		if(m_ViewportHovered)
+			m_EditorCamera.OnUpdate(dt);
 
 		for (auto& entity : m_Meshes) {
 			entity->OnUpdate(dt);

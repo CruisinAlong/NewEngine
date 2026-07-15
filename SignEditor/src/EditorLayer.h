@@ -24,7 +24,7 @@ namespace Sign {
 
 		Vector2D m_ViewportSize = { 0.0f,0.0f };
 		Vector2D m_ViewportBounds[2];
-		bool m_ViewportHovered;
+		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		bool m_PickRequest = false;
 		Vector2D m_PickCoords;
 

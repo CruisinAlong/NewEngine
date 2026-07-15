@@ -1,6 +1,7 @@
 #pragma once
 #include "Sign/Scene/Scene.h"
 #include "Sign/Scene/EntityECS.h"
+#include "Sign/Math/MathUtils.h"
 namespace Sign {
 	class SceneHierarchy
 	{
@@ -13,7 +14,12 @@ namespace Sign {
 
 		void OnImGuiRender();
 	private:
+		void DrawTreeNode(EntityECS entity);
+		void DrawComponents(EntityECS entity);
+
+	private:
 		std::shared_ptr<Scene> m_Context;
+		EntityECS m_SelectedEntity;
 	};
 }
 

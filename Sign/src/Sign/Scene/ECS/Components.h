@@ -19,17 +19,16 @@ namespace Sign {
 	}
 	struct TransformComponent {
 		Vector3D Translation = { 0.0f,0.0f,0.0f };
-		Quaternion Rotation = { 0.0f,0.0f,0.0f,0.0f };
+		Vector3D Rotation = { 0.0f,0.0f,0.0f};
 		Vector3D Scale = { 1.0f,1.0f,1.0f };
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const Vector3D& translation) : Translation(translation) {}
 
 		Mat4 GetTransform() const {
+			Mat4 rotation = Mat4::fromQuaternion(Quaternion::FromEulerAngles(Rotation));
 			return	Mat4::scale(Scale)
-				* Mat4::rotateX(Rotation.x)
-				* Mat4::rotateY(Rotation.y)
-				* Mat4::rotateZ(Rotation.z)
+				* rotation
 				* Mat4::translate(Translation);
 		}
 

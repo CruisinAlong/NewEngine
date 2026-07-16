@@ -14,6 +14,7 @@ end
 
 includes("Sign/vendor/ImGui")
 includes("Sign/vendor/DirectXTex")
+includes("Sign/vendor/ImGuizmo")
 target("Sign")
 	set_kind("static")
 	set_languages("c++23")
@@ -36,9 +37,10 @@ target("Sign")
 		"Sign/vendor/ImGui",
 		"Sign/vendor/DirectX-Headers/include",
 		"Sign/vendor/DirectXTex/DirectXTex",
+		"Sign/vendor/ImGuizmo/src",
 		"Sign/src", {public = true} )
 
-	add_deps("ImGui", "DirectXTex", {public = true})
+	add_deps("ImGui", "DirectXTex", "ImGuizmo",{public = true})
 	add_links(
 		--"ImGui",
 		"dwmapi.lib", "d3d12.lib", "dxgi.lib",

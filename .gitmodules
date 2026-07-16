@@ -7,3 +7,6 @@
 [submodule "Sign/vendor/DirectXTex"]
 	path = Sign/vendor/DirectXTex
 	url = https://github.com/ReignDer/DirectXTex
+[submodule "Sign/vendor/ImGuizmo"]
+	path = Sign/vendor/ImGuizmo
+	url = https://github.com/ReignDer/ImGuizmo

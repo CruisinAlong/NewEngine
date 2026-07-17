@@ -4,6 +4,8 @@
 #include "ProBuilder/ProBuilderTool.h"
 
 namespace Sign {
+	static bool p_open = false;
+	static bool p_Credits = false;
 	EditorLayer::EditorLayer()
 	{
 		std::println("Editor Layer Created");
@@ -22,6 +24,7 @@ namespace Sign {
 
 		Renderer::RegisterFrameBuffers("MainEditorBuffer", m_FrameBuffer);
 
+		m_Texture2D = std::make_shared<Texture2D>("SignEditor/assets/dlsu-logo.png");
 		/*************** ECS VERSION ********************/
 		m_ActiveScene = std::make_shared<Scene>();
 
@@ -40,6 +43,18 @@ namespace Sign {
 		auto& PlaneTransform = Plane.GetComponent<TransformComponent>();
 		PlaneTransform.Scale = { 5.0f,0.0f,5.0f };
 		PlaneTransform.Translation = { 0.0f,-0.5f,0.0f };
+
+		//int index = 0;
+		//for (int i = 0; i < 10000; i++) {
+		//	
+		//	auto CubeECS = m_ActiveScene->CreateEntity("Cube" + std::to_string(index));
+		//	CubeECS.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
+		//	auto& CubeTransform = CubeECS.GetComponent<TransformComponent>();
+		//	CubeTransform.Translation = { MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f),MathUtils::Random_Float(-100.f,100.f) };
+		//	index++;
+		//}
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		/***********************************************/
 
 		/*************** OOP VERSION ********************/
@@ -52,11 +67,11 @@ namespace Sign {
 		m_Meshes.push_back(plane);
 		/***********************************************/
 
-		// Create ProBuilder UI/tool
+// Create ProBuilder UI/tool
 		m_ProBuilderWindow = std::make_unique<ProBuilder::ProBuilderEditorWindow>();
 		m_ProBuilderTool = std::make_unique<ProBuilder::ProBuilderTool>();
 
-		std::println("Entity Numbers: {}", m_Meshes.size());
+		std::println("Entity Numbers: {}", m_ActiveScene->GetRegistry().GetPool<TagComponent>().Size());
 	}
 
 	void EditorLayer::OnDettach()
@@ -88,8 +103,8 @@ namespace Sign {
 
 
 		
-
-		m_EditorCamera.OnUpdate(dt);
+		if(m_ViewportHovered)
+			m_EditorCamera.OnUpdate(dt);
 
 		for (auto& entity : m_Meshes) {
 			if (entity)
@@ -215,6 +230,56 @@ namespace Sign {
 		if (opt_demo_mode_changed)
 			ImGui::SetNextWindowFocus();
 
+if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Edit"))
+			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Tools")) {
+				ImGui::MenuItem("Color Picker", NULL, &p_open);
+			
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("About")) {
+				ImGui::MenuItem("Credits", NULL, &p_Credits);
+
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+
+		if (p_open) {
+			ColorPicker();
+		}
+		if (p_Credits) {
+			ImGui::SetNextWindowSize(ImVec2(800, 900), ImGuiCond_FirstUseEver);
+			if (!ImGui::Begin("Credits", &p_Credits))
+			{
+				ImGui::End();
+				return;
+			}
+			float contentWidth = ImGui::GetContentRegionAvail().x;
+
+			float texWidth = (float)m_Texture2D->GetWidth();
+			float texHeight = (float)m_Texture2D->GetHeight();
+			float aspectHeight = (texHeight / texWidth) * contentWidth;
+			ImVec2 displaySize(contentWidth, aspectHeight);
+			ImGui::Image((ImTextureID)m_Texture2D->GetGpuHandle().ptr, displaySize);
+			ImGui::Text("About");
+			ImGui::Text("DX12 Engine by Mathieu Marc I. Pobre");
+			ImGui::NewLine();
+			ImGui::Text("Acknoledgements:");
+			ImGui::Text("The Cherno Hazel  Game Engine Tutorial");
+			ImGui::Text("Dr. Neil De Gallego and Sir Martin Laureta's GDENG03 course");
+			ImGui::End();
+		}
 		ImGui::Begin("Examples: Dockspace", &dockSpaceOpen, ImGuiWindowFlags_MenuBar);
 
 		opt_demo_mode_changed = false;
@@ -245,6 +310,8 @@ namespace Sign {
 			ImGui::CheckboxFlags("Flag: AutoHideTabBar", &args, ImGuiDockNodeFlags_AutoHideTabBar);
 		}
 
+m_SceneHierarchyPanel.OnImGuiRender();
+		// Show demo options and help
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("Tools")) {
@@ -294,6 +361,25 @@ namespace Sign {
 		{
 			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes, m_StairsCount);
 		}
+	}
+
+	void EditorLayer::ColorPicker()
+	{
+		static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 255.0f / 255.0f);
+		static ImGuiColorEditFlags base_flags = ImGuiColorEditFlags_None;
+		ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+		if (!ImGui::Begin("Color Picker", &p_open))
+		{
+			ImGui::End();
+			return;
+		}
+		ImGui::ColorPicker3("##MyColor##6", (float*)&color, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha);
+		ImGui::SameLine();
+		ImGui::Text("Color");
+		ImGui::SameLine();
+		ImVec2 size = ImVec2(100.f, 100.f);
+		ImGui::ColorButton("##MyColor##6", color, ImGuiColorEditFlags_NoAlpha,size);
+		ImGui::End();
 	}
 
 	bool EditorLayer::OnWindowResizedEvent(WindowResizedEvent& e)

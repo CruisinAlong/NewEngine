@@ -10,6 +10,8 @@ namespace Sign {
 		Vector3D() : x(0), y(0), z(0) {}
 		Vector3D(const float _x, const float _y, const float _z) : x(_x), y(_y), z(_z) {}
 
+
+
 		void operator+= (const Vector3D& v) noexcept
 		{
 			this->x += v.x;

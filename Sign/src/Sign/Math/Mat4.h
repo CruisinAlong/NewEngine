@@ -34,6 +34,31 @@ namespace Sign {
 			res.matrix[3][3] = 1;
 			return res;
 		}
+		static Mat4 fromQuaternion(const Quaternion& q) noexcept
+		{
+			Mat4 res{};
+			float xx = q.x * q.x, yy = q.y * q.y, zz = q.z * q.z;
+			float xy = q.x * q.y, xz = q.x * q.z, yz = q.y * q.z;
+			float wx = q.w * q.x, wy = q.w * q.y, wz = q.w * q.z;
+
+			res.matrix[0][0] = 1 - 2 * (yy+zz);
+			res.matrix[0][1] = 2 * (xy + wz);
+			res.matrix[0][2] = 2 * (xz - wy);
+
+			res.matrix[1][0] = 2 * (xy - wz);
+			res.matrix[1][1] = 1 - 2 * (xx + zz);
+			res.matrix[1][2] = 2 * (yz + wx);
+
+			res.matrix[2][0] = 2 * (xz + wy);
+			res.matrix[2][1] = 2 * (yz - wx);
+			res.matrix[2][2] = 1 - 2 * (xx + yy);
+
+			res.matrix[3][3] = 1;
+
+			return res;
+		}
+
+
 		static Mat4 rotateX(float x) noexcept 
 		{
 			Mat4 res{};

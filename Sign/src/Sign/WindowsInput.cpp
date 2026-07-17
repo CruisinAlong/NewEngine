@@ -13,7 +13,7 @@ namespace Sign {
 		return (GetAsyncKeyState(static_cast<int>(button)) & 0x8000) != 0;
 	}
 
-	DirectX::XMFLOAT2 Input::GetMousePos() {
+	Vector2D Input::GetMousePos() {
 		if (GetForegroundWindow() != Application::Get().GetWindow().GetHandle()) return { 0.0f,0.0f };
 
 		POINT p;

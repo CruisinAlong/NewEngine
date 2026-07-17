@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector3D.h"
+#include "MathUtils.h"
 #include <cmath>
 namespace Sign {
 	class Quaternion {
@@ -27,6 +28,27 @@ namespace Sign {
 					sr * cp * cy - cr * sp * sy,
 					cr * cp * cy + sr * sp * sy
 				};
+		}
+
+		static Quaternion FromEulerAngles(const Vector3D& vec) noexcept {
+			Vector3D halfAngles = { 0.5f * vec.x, 0.5f * vec.y, 0.5f * vec.z };
+
+			const float sinX = std::sinf(halfAngles.x);
+			const float cosX = std::cosf(halfAngles.x);
+			const float sinY = std::sinf(halfAngles.y);
+			const float cosY = std::cosf(halfAngles.y);
+			const float sinZ = std::sinf(halfAngles.z);
+			const float cosZ = std::cosf(halfAngles.z);
+
+
+			return Quaternion( sinX * cosY * cosZ - cosX * sinY * sinZ,
+				cosX * sinY * cosZ + sinX * cosY * sinZ,
+				cosX * cosY * sinZ - sinX * sinY * cosZ,
+				cosX * cosY * cosZ + sinX * sinY * sinZ );
+		}
+		static Quaternion FromEulerAnglesDegrees(const Vector3D& vec) noexcept {
+			Vector3D vecRad = MathUtils::ConvertToRadiansVec3(vec);
+			return FromEulerAngles(vecRad);
 		}
 		Quaternion operator*(const Quaternion& q) const noexcept
 		{

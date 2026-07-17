@@ -39,7 +39,6 @@ namespace Sign {
 	Application::~Application()
 	{
 
-
 		m_LayerStack.Clear();
 		Renderer::ShutDown();
 		m_Window.reset();

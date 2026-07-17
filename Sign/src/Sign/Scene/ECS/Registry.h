@@ -30,6 +30,9 @@ namespace Sign {
 
 		Signature GetSignature(EntityID entity);
 
+		template<typename Func>
+		void each(Func&& func);
+
 
 	private:
 		EntityManager m_EntityManager;
@@ -83,6 +86,13 @@ namespace Sign {
 		}
 
 		return *static_cast<SparseSet<T>*>(it->second.get());
+	}
+	template<typename Func>
+	inline void Registry::each(Func&& func)
+	{
+		for (EntityID entity : m_EntityManager.GetAliveEntities()) {
+			func(entity);
+		}
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "Sign/Renderer/Mesh.h"
 #include "Sign/Renderer/MeshUtils.h"
 #include "Sign/Math/SignMath.h"
+#include "Sign/Renderer/ResourceCache.h"
 namespace Sign {
 	namespace Primitive {
 		static const std::array<Vector3D, 24> cubePosition = { {
@@ -36,6 +37,7 @@ namespace Sign {
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f},
 					{1.0f,1.0f,1.0f},{1.0f,1.0f,1.0f}}}
 				);
+
 		};
 
 		struct Cylinder

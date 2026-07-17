@@ -1,38 +1,36 @@
+// Reworked to use ECS entities
 #pragma once
-#include <vector>
-#include "Sign/Math/MathUtils.h"
 #include "EditorCommand.h"
-#include "Sign/Renderer/Entity.h"
-#include "Sign/Renderer/CubeEntity.h"
-#include "Sign/Renderer/PlaneEntity.h"
-#include "Sign/Renderer/SphereEntity.h"
-#include "Sign/Renderer/CircleEntity.h"
-#include "Sign/Math/SignMath.h" // for Vector3D
+#include "Sign/Scene/EntityECS.h"
+#include "Sign/Scene/Scene.h"
+#include "Sign/Renderer/Primitive3D.h"
+#include "Sign/Scene/ECS/Components.h"
+#include "Sign/Renderer/Entity.h" // for PrimitiveType and legacy Entity
+#include <vector>
 
-// forward declare CylinderEntity to avoid including its header in this header
-namespace Sign { class CylinderEntity; }
 namespace Sign {
-	class CreateObjectCommand : public EditorCommand
-	{
+	class CreateObjectCommand : public EditorCommand {
 	public:
-		// existing ctor
-		CreateObjectCommand(std::vector<std::shared_ptr<Entity>>& entityList, PrimitiveType type)
-			: m_EntityList(entityList), m_PType(type), m_Entity(nullptr), m_UseSpawn(false) {}
+		// ECS constructor
+		CreateObjectCommand(std::vector<EntityECS>& entityList, Scene* scene, PrimitiveType type)
+			: m_EntityListECS(&entityList), m_EntityListLegacy(nullptr), m_Scene(scene), m_PType(type) {}
 
-		// new ctor: spawn position in world space
-		CreateObjectCommand(std::vector<std::shared_ptr<Entity>>& entityList, PrimitiveType type, const Vector3D& spawnPos)
-			: m_EntityList(entityList), m_PType(type), m_Entity(nullptr), m_UseSpawn(true), m_SpawnPos(spawnPos) {}
+		// legacy constructor (keeps old behavior)
+		CreateObjectCommand(std::vector<std::shared_ptr<Entity>>& legacyList, PrimitiveType type)
+			: m_EntityListECS(nullptr), m_EntityListLegacy(&legacyList), m_Scene(nullptr), m_PType(type) {}
 
 		void Execute() override;
 		void Undo() override;
 
 	private:
 		PrimitiveType m_PType;
-		std::vector<std::shared_ptr<Entity>>& m_EntityList;
-		std::shared_ptr<Entity> m_Entity;
-
-		bool m_UseSpawn = false;
-		Vector3D m_SpawnPos = {0.0f, 0.0f, 0.0f};
+		// ECS mode
+		std::vector<EntityECS>* m_EntityListECS = nullptr;
+		Scene* m_Scene = nullptr;
+		EntityECS m_Entity;
+		// legacy mode
+		std::vector<std::shared_ptr<Entity>>* m_EntityListLegacy = nullptr;
+		std::shared_ptr<Entity> m_LegacyEntity;
 	};
 }
 

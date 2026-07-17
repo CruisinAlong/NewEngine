@@ -245,7 +245,12 @@ if (ImGui::BeginMainMenuBar())
 
 			if (ImGui::BeginMenu("Tools")) {
 				ImGui::MenuItem("Color Picker", NULL, &p_open);
-			
+				if (m_ProBuilderWindow)
+				{
+					bool vis = m_ProBuilderWindow->IsVisible();
+					ImGui::MenuItem("ProBuilder", NULL, &vis);
+					m_ProBuilderWindow->SetVisible(vis);
+				}			
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("About")) {
@@ -312,7 +317,6 @@ if (ImGui::BeginMainMenuBar())
 		}
 
 m_SceneHierarchyPanel.OnImGuiRender();
-		// Show demo options and help
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("Tools")) {
@@ -363,7 +367,7 @@ m_SceneHierarchyPanel.OnImGuiRender();
 			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes, m_StairsCount, m_FaceSelectionEnabled);
 		}
 		
-		// If face selection is turned off, clear any currently selected face so nothing stays highlighted.
+
 		if (!m_FaceSelectionEnabled) {
 			m_SelectedFaceID = -1;
 			
@@ -414,17 +418,17 @@ m_SceneHierarchyPanel.OnImGuiRender();
 		}
 		case Key::Backspace:
 		{
-			RemoveObjectCommand* command = new RemoveObjectCommand(m_Meshes);
+			RemoveObjectCommand* command = new RemoveObjectCommand(m_EntityList);
 			command->Execute();
-			std::println("Entitiy Number: {}", m_Meshes.size());
+			std::println("Entitiy Number: {}", m_EntityList.size());
 			m_EditorHistory.Record(command);
 			break;
 		}
 		case Key::Delete:
 		{
-			DeleteAllCommand* command = new DeleteAllCommand(m_Meshes, m_InitialEntityCount);
+			DeleteAllCommand* command = new DeleteAllCommand(m_EntityList, m_InitialEntityCount);
 			command->Execute();
-			std::println("Entitiy Number: {}", m_Meshes.size());
+			std::println("Entitiy Number: {}", m_EntityList.size());
 			m_EditorHistory.Record(command);
 			break;
 		}
@@ -444,7 +448,6 @@ m_SceneHierarchyPanel.OnImGuiRender();
 	}
 	bool EditorLayer::OnMouseButtonPressedEvent(MouseButtonPressedEvent& e)
 	{
-		// If face selection is disabled, ignore right-click pick requests
 		if (e.GetMouseButton() == Mouse::RightButton && !m_FaceSelectionEnabled)
 			return false;
 

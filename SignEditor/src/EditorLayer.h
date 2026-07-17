@@ -40,9 +40,11 @@ namespace Sign {
 
 		std::shared_ptr<Texture2D> m_Texture2D;
 
-		std::shared_ptr<Shader> m_Shader;
-		std::vector<std::shared_ptr<Entity>> m_Meshes;
+       std::shared_ptr<Shader> m_Shader;
+		std::vector<std::shared_ptr<Entity>> m_Meshes; // legacy OOP entities (kept for compatibility)
 		std::vector<PrimitiveType> m_PendingMeshes;
+		// Editor list that keeps ECS entity handles in order (used by the commands)
+		std::vector<EntityECS> m_EntityList;
 		int m_InitialEntityCount = 0;
 		EditorHistory m_EditorHistory;
 

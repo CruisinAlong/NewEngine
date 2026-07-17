@@ -1,60 +1,105 @@
 #include "signpch.h"
 #include "CreateObjectCommand.h"
-#include "Sign/Renderer/CylinderEntity.h"
-#include "Sign/Renderer/StairsEntity.h"
+#include <algorithm>
+#include "Sign/Renderer/Primitive2D.h"
+#include "Sign/Math/MathUtils.h"
+#include "Sign/Renderer/CubeEntity.h"
+#include "Sign/Renderer/PlaneEntity.h"
+#include "Sign/Renderer/SphereEntity.h"
+#include "Sign/Renderer/CircleEntity.h"
 
 namespace Sign {
-    void CreateObjectCommand::Execute()
-    {
-        if (m_Entity == nullptr) {
+
+void CreateObjectCommand::Execute()
+{
+    if (m_EntityListECS && m_Scene) {
+        // ECS path
+        if (!m_Entity && m_Scene) {
+            m_Entity = m_Scene->CreateEntity();
+
             switch (m_PType) {
             case PrimitiveType::Cube:
-                m_Entity = std::make_shared<CubeEntity>();
+                m_Entity.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
                 break;
             case PrimitiveType::Plane:
-                m_Entity = std::make_shared<PlaneEntity>();
-                break;
-            case PrimitiveType::Cylinder:
-                m_Entity = std::make_shared<CylinderEntity>();
+                m_Entity.AddComponent<MeshRendererComponent>(Primitive::Plane::Create());
                 break;
             case PrimitiveType::Sphere:
-                m_Entity = std::make_shared<SphereEntity>();
+                m_Entity.AddComponent<MeshRendererComponent>(Primitive::Sphere::Create());
                 break;
             case PrimitiveType::Circle:
-                m_Entity = std::make_shared<CircleEntity>();
+                m_Entity.AddComponent<MeshRendererComponent>(Sign::Primitive::Circle::Create());
                 break;
             default:
-                // If enum doesn't include Stairs in this translation unit, we'll check numeric value below
+                m_Entity.AddComponent<MeshRendererComponent>(Primitive::Cube3D::Create());
                 break;
             }
 
-            // Fallback: create stairs if the underlying integer value matches expected index (5)
-            if (m_Entity == nullptr) {
-                int p = static_cast<int>(m_PType);
-                if (p == 5) { // 5 corresponds to Stairs when available
-                    m_Entity = std::make_shared<StairsEntity>();
-                }
+            auto& t = m_Entity.GetComponent<TransformComponent>();
+            t.Translation = { MathUtils::Random_Float(-10.0f, 10.0f), MathUtils::Random_Float(-10.0f, 10.0f), MathUtils::Random_Float(-10.0f, 10.0f) };
+        }
+
+        if (m_Entity) {
+            m_EntityListECS->push_back(m_Entity);
+        }
+
+        return;
+    }
+
+    // legacy path
+    if (m_EntityListLegacy) {
+        if (!m_LegacyEntity) {
+            // create legacy OOP entity for backward compatibility
+            switch (m_PType) {
+            case PrimitiveType::Cube:
+                m_LegacyEntity = std::make_shared<CubeEntity>();
+                break;
+            case PrimitiveType::Plane:
+                m_LegacyEntity = std::make_shared<PlaneEntity>();
+                break;
+            case PrimitiveType::Sphere:
+                m_LegacyEntity = std::make_shared<SphereEntity>();
+                break;
+            case PrimitiveType::Circle:
+                m_LegacyEntity = std::make_shared<CircleEntity>();
+                break;
+            default:
+                m_LegacyEntity = std::make_shared<CubeEntity>();
+                break;
             }
         }
 
-        if (!m_Entity) {
-            return;
-        }
-
-        if (m_UseSpawn) {
-            m_Entity->SetTranslation(m_SpawnPos);
-        } else {
-            std::println("CreateObjectCommand::Execute - No spawn position provided, using default translation.");
-        }
-
-        m_EntityList.push_back(m_Entity);
-    }
-
-    void CreateObjectCommand::Undo()
-    {
-        auto it = std::find(m_EntityList.begin(), m_EntityList.end(), m_Entity);
-        if (it != m_EntityList.end()) {
-            m_EntityList.erase(it);
+        if (m_LegacyEntity) {
+            m_EntityListLegacy->push_back(m_LegacyEntity);
         }
     }
+}
+
+void CreateObjectCommand::Undo()
+{
+    if (m_EntityListECS) {
+        if (!m_EntityListECS->empty()) {
+            auto it = std::find(m_EntityListECS->begin(), m_EntityListECS->end(), m_Entity);
+            if (it != m_EntityListECS->end())
+                m_EntityListECS->erase(it);
+        }
+
+        if (m_Scene && m_Entity) {
+            m_Scene->DestroyEntity(m_Entity);
+            m_Entity = EntityECS();
+        }
+
+        return;
+    }
+
+    if (m_EntityListLegacy) {
+        if (!m_EntityListLegacy->empty()) {
+            auto it = std::find(m_EntityListLegacy->begin(), m_EntityListLegacy->end(), m_LegacyEntity);
+            if (it != m_EntityListLegacy->end())
+                m_EntityListLegacy->erase(it);
+        }
+        m_LegacyEntity.reset();
+    }
+}
+
 }

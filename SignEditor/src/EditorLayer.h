@@ -48,6 +48,8 @@ namespace Sign {
 
 		int m_StairsCount = 5;
 
+		bool m_FaceSelectionEnabled = true;
+
 		PerspectiveCamera m_EditorCamera;
 
 		std::unique_ptr<ProBuilder::ProBuilderTool> m_ProBuilderTool;

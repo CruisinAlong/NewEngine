@@ -182,7 +182,8 @@ namespace Sign {
 
 		
 		/*******ECS********/
-		m_ActiveScene->RenderScene(m_SelectedEntity ? m_SelectedEntity.GetID() : INVALID_ENTITY_ID, m_SelectedFaceID);
+		uint32_t faceIDToSend = m_FaceSelectionEnabled ? (uint32_t)m_SelectedFaceID : UINT32_MAX;
+		m_ActiveScene->RenderScene(m_SelectedEntity ? m_SelectedEntity.GetID() : INVALID_ENTITY_ID, faceIDToSend);
 		/*****************/
 
 
@@ -357,9 +358,15 @@ m_SceneHierarchyPanel.OnImGuiRender();
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		if (m_ProBuilderWindow && m_ProBuilderWindow->IsVisible())
-		{
-			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes, m_StairsCount);
+		if (m_ProBuilderWindow && m_ProBuilderWindow->IsVisible()){
+		// pass stairs count and face-selection flag by reference so the window can edit them
+			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes, m_StairsCount, m_FaceSelectionEnabled);
+		}
+		
+		// If face selection is turned off, clear any currently selected face so nothing stays highlighted.
+		if (!m_FaceSelectionEnabled) {
+			m_SelectedFaceID = -1;
+			
 		}
 	}
 
@@ -437,7 +444,11 @@ m_SceneHierarchyPanel.OnImGuiRender();
 	}
 	bool EditorLayer::OnMouseButtonPressedEvent(MouseButtonPressedEvent& e)
 	{
-		switch (e.GetMouseButton()) 
+		// If face selection is disabled, ignore right-click pick requests
+		if (e.GetMouseButton() == Mouse::RightButton && !m_FaceSelectionEnabled)
+			return false;
+
+		switch (e.GetMouseButton())
 		{
 		case Mouse::RightButton:
 		{
@@ -446,11 +457,11 @@ m_SceneHierarchyPanel.OnImGuiRender();
 			my -= m_ViewportBounds[0].y;
 
 			Vector2D viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-			
+
 			int mouseX = (int)mx;
 			int mouseY = (int)my;
 
-			
+
 			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y) {
 				std::println("mx: {}, my: {}, viewportSize: {}x{}, framebuffer: {}x{}",
 					mx, my, viewportSize.x, viewportSize.y,
@@ -459,7 +470,7 @@ m_SceneHierarchyPanel.OnImGuiRender();
 				m_PickCoords.y = mouseY;
 
 				m_PickRequest = true;
-				
+
 			}
 			break;
 		}

@@ -3,43 +3,47 @@
 
 namespace ProBuilder {
 
-ProBuilderEditorWindow::ProBuilderEditorWindow()
-{
-}
+    ProBuilderEditorWindow::ProBuilderEditorWindow() = default;
 
-void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pending, int& stairsCount)
-{
-    if (!m_Open)
-        return;
+    void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pending, int& stairsCount, bool& faceSelectionEnabled)
+    {
+        if (!m_Open) return;
 
-    ImGui::Begin("ProBuilder", &m_Open);
+        ImGui::Begin("ProBuilder", &m_Open);
 
-    if (ImGui::Button("Create Cube")) {
-        pending.push_back(Sign::PrimitiveType::Cube);
-        std::println("[ProBuilder] Create Cube clicked");
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Create Plane")) {
-        pending.push_back(Sign::PrimitiveType::Plane);
-        std::println("[ProBuilder] Create Plane clicked");
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Create Cylinder")) {
-        pending.push_back(Sign::PrimitiveType::Cylinder);
-        std::println("[ProBuilder] Create Cylinder clicked");
-    }
-    if (ImGui::Button("Create Sphere")) {
-        pending.push_back(Sign::PrimitiveType::Sphere);
-        std::println("[ProBuilder] Create Sphere clicked");
-    }
-    ImGui::TextUnformatted("Stairs");
-    ImGui::SliderInt("Steps", &stairsCount, 1, 128); // adjust max if needed
-    if (ImGui::Button("Add Stairs")) {
-        // When EditorLayer processes the queue it will use the editor's current stairsCount
-        pending.push_back(Sign::PrimitiveType::Stairs);
+        ImGui::TextUnformatted("Primitives");
+        if (ImGui::Button("Add Cube")) {
+            pending.push_back(Sign::PrimitiveType::Cube);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add Plane")) {
+            pending.push_back(Sign::PrimitiveType::Plane);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add Cylinder")) {
+            pending.push_back(Sign::PrimitiveType::Cylinder);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add Sphere")) {
+            pending.push_back(Sign::PrimitiveType::Sphere);
+        }
+
+        ImGui::Separator();
+
+        ImGui::TextUnformatted("Stairs");
+        ImGui::SliderInt("Steps", &stairsCount, 1, 128);
+        if (ImGui::Button("Add Stairs")) {
+            pending.push_back(Sign::PrimitiveType::Stairs);
+        }
+
+        ImGui::Separator();
+
+        ImGui::TextUnformatted("Selection");
+        ImGui::Checkbox("Enable Face Selection (right-click)", &faceSelectionEnabled);
+        ImGui::SameLine();
+        ImGui::TextDisabled("(toggle on to pick faces)");
+
+        ImGui::End();
     }
 
-    ImGui::End();
-}
-
-}
+} 

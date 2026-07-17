@@ -6,7 +6,6 @@ namespace Sign {
     {
         if (s_DefaultStairsMesh == nullptr) {
             std::println("[StairsEntity] s_DefaultStairsMesh == nullptr -> creating default stairs mesh");
-            // default steps=5, width=1, stepHeight=0.25, depthPerStep=0.5, white color
             s_DefaultStairsMesh = Primitive::Stairs::Create(5, 1.0f, 0.25f, 0.5f, Vector3D(1.0f, 1.0f, 1.0f));
             std::println("[StairsEntity] Created default stairs mesh: verts={}, indices={}", s_DefaultStairsMesh->GetVertexArray()->GetIndexBufferCount() /* rough info */, 0);
         }
@@ -24,6 +23,6 @@ namespace Sign {
 
     void StairsEntity::OnUpdate(Timestep dt)
     {
-        // no per-frame behavior by default
+
     }
 }

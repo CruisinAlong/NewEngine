@@ -113,7 +113,6 @@ namespace Sign {
 				srcIndices.push_back((WORD)(bottomStart + i));
 			}
 
-			// Expand into per-triangle vertices and assign FaceIDs:
 			std::vector<VertexPosColor> finalVertices;
 			std::vector<WORD> finalIndices;
 			finalVertices.reserve(srcIndices.size());
@@ -123,19 +122,16 @@ namespace Sign {
 			for (int t = 0; t < triTotal; ++t) {
 				uint32_t faceID;
 				if (t < segments) {
-					// top triangles -> one faceID per top triangle
-					faceID = (uint32_t)t; // 0..segments-1
+					faceID = (uint32_t)t; 
 				}
 				else if (t < segments + 2 * segments) {
-					// side triangles - map each quad (2 tris) to one faceID
-					int sideTriIndex = t - segments; // 0..(2*segments-1)
-					int segmentIndex = sideTriIndex / 2; // same for both tris of the quad
-					faceID = (uint32_t)segments + (uint32_t)segmentIndex; // sides start after top triangle IDs
+					int sideTriIndex = t - segments; 
+					int segmentIndex = sideTriIndex / 2; 
+					faceID = (uint32_t)segments + (uint32_t)segmentIndex; 
 				}
 				else {
-					// bottom triangles -> one faceID per bottom triangle
-					int bottomTriIndex = t - (segments + 2 * segments); // 0..segments-1
-					faceID = (uint32_t)segments + (uint32_t)segments + (uint32_t)bottomTriIndex; // bottom IDs follow top+side IDs
+					int bottomTriIndex = t - (segments + 2 * segments); 
+					faceID = (uint32_t)segments + (uint32_t)segments + (uint32_t)bottomTriIndex; 
 				}
 
 				for (int j = 0; j < 3; ++j) {
@@ -158,7 +154,6 @@ namespace Sign {
 
 		std::shared_ptr<Mesh> Sphere::Create(const Vector3D& Color)
 		{
-			// Generate an icosphere-like mesh cached by key.
 			return ResourceCache::GetOrCreate<Mesh>("DefaultSphere", [&]()->std::shared_ptr<Mesh> {
 				const float H_ANGLE = MathUtils::ConvertToRadians(72.0f);
 				const float V_ANGLE = std::atanf(1.0f / 2.0f);
@@ -302,7 +297,6 @@ namespace Sign {
 		{
 			if (steps < 1) steps = 1;
 
-			// compute per-step values so overall dimensions are invariant to 'steps'
 			float stepHeight = totalHeight / (float)steps;
 			float depthPerStep = totalDepth / (float)steps;
 
@@ -311,19 +305,12 @@ namespace Sign {
 
 			float halfW = stepWidth * 0.5f;
 
-			// Index mapping for an 8-vertex box (per-step)
 			static const WORD cubeIndices8[36] = {
-				// front (0,1,2,3)
 				0,1,2, 0,2,3,
-				// back (4,7,6,5)
 				4,7,6, 4,6,5,
-				// top (1,5,6,2)
 				1,5,6, 1,6,2,
-				// bottom (0,3,7,4)
 				0,3,7, 0,7,4,
-				// left (0,4,5,1)
 				0,4,5, 0,5,1,
-				// right (3,2,6,7)
 				3,2,6, 3,6,7
 			};
 
@@ -344,10 +331,9 @@ namespace Sign {
 					{ Vector3D(halfW, 0.0f,  backZ), Color, 0 }
 				};
 
-				// For each triangle, create independent vertices with FaceID
-				const int triCount = 12; // 6 faces * 2 triangles
+				const int triCount = 12; 
 				for (int t = 0; t < triCount; ++t) {
-					uint32_t faceID = (uint32_t)(s * 6 + (t / 2)); // assign one faceID per face (two triangles)
+					uint32_t faceID = (uint32_t)(s * 6 + (t / 2)); 
 					for (int j = 0; j < 3; ++j) {
 						WORD src = cubeIndices8[t * 3 + j];
 						VertexPosColor v;

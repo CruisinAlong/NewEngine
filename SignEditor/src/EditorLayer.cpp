@@ -67,7 +67,6 @@ namespace Sign {
 		m_Meshes.push_back(plane);
 		/***********************************************/
 
-// Create ProBuilder UI/tool
 		m_ProBuilderWindow = std::make_unique<ProBuilder::ProBuilderEditorWindow>();
 		m_ProBuilderTool = std::make_unique<ProBuilder::ProBuilderTool>();
 
@@ -86,7 +85,6 @@ namespace Sign {
 		m_FrameBuffer.reset();
 		m_Shader.reset();
 
-		// Tear down ProBuilder UI/tool
 		m_ProBuilderWindow.reset();
 		m_ProBuilderTool.reset();
 	}
@@ -363,7 +361,6 @@ m_SceneHierarchyPanel.OnImGuiRender();
 		ImGui::PopStyleVar();
 
 		if (m_ProBuilderWindow && m_ProBuilderWindow->IsVisible()){
-		// pass stairs count and face-selection flag by reference so the window can edit them
 			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes, m_StairsCount, m_FaceSelectionEnabled);
 		}
 		

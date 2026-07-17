@@ -13,7 +13,6 @@ namespace Sign {
 void CreateObjectCommand::Execute()
 {
     if (m_EntityListECS && m_Scene) {
-        // ECS path
         if (!m_Entity && m_Scene) {
             m_Entity = m_Scene->CreateEntity();
 

@@ -239,7 +239,7 @@ namespace Sign {
 
 			return 0;
 		}
-		case WM_EXITSIZEMOVE:  // fires ONCE when user releases the window edge
+		case WM_EXITSIZEMOVE:  
 		{
 			if (window && window->m_PendingResize) {
 				WindowResizedEvent e(window->m_WindowsSpecification.Width, window->m_WindowsSpecification.Height);

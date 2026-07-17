@@ -15,7 +15,6 @@ namespace Sign {
                 float x0 = -stepWidth * 0.5f;
                 float x1 = stepWidth * 0.5f;
 
-                // 8 vertices for the step box
                 VertexPosColor v0{ {x0, y0, z0}, Color };
                 VertexPosColor v1{ {x0, y1, z0}, Color };
                 VertexPosColor v2{ {x1, y1, z0}, Color };

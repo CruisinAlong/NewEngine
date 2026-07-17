@@ -23,7 +23,6 @@ namespace Sign {
 			out[2] = z * inv;
 		}
 
-		// --- existing primitive implementations follow ---
 		std::shared_ptr<Mesh> Cube3D::Create(const std::array<Vector3D, 6>& color)
 		{
 			std::vector<VertexPosColor> finalVertices;
@@ -57,7 +56,6 @@ namespace Sign {
 
 			float half = height * 0.5f;
 
-			// Top center
 			rawVerts.push_back(0.0f); rawVerts.push_back(half); rawVerts.push_back(0.0f);
 
 			// Top ring
@@ -84,7 +82,6 @@ namespace Sign {
 			const WORD bottomStart = (WORD)(1 + segments);
 			const WORD bottomCenterIndex = (WORD)(rawVerts.size() / 3 - 1);
 
-			// Build a src index list in the same order as previous logic
 			// Top fan
 			for (int i = 0; i < segments; i++) {
 				srcIndices.push_back(topCenterIndex);
@@ -92,7 +89,7 @@ namespace Sign {
 				srcIndices.push_back((WORD)(topStart + ((i + 1) % segments)));
 			}
 
-			// Side quads (two triangles each)
+			// Side quads 
 			for (int i = 0; i < segments; i++) {
 				int next = (i + 1) % segments;
 				// triangle 1
@@ -112,10 +109,7 @@ namespace Sign {
 				srcIndices.push_back((WORD)(bottomStart + i));
 			}
 
-			// Expand into per-triangle vertices and assign FaceIDs:
-			// top triangles -> faceID = 1
-			// side triangles -> assign one faceID per segment (so sides are selectable per segment)
-			// bottom triangles -> faceID = 2
+
 			std::vector<VertexPosColor> finalVertices;
 			std::vector<WORD> finalIndices;
 			finalVertices.reserve(srcIndices.size());
@@ -125,16 +119,19 @@ namespace Sign {
 			for (int t = 0; t < triTotal; ++t) {
 				uint32_t faceID;
 				if (t < segments) {
-					faceID = 1; // top
+					// top triangles 
+					faceID = (uint32_t)t; 
 				}
 				else if (t < segments + 2 * segments) {
-					// side triangles - map each quad (2 tris) to one faceID
-					int sideTriIndex = t - segments; // 0..(2*segments-1)
-					int segmentIndex = sideTriIndex / 2; // same for both tris of the quad
-					faceID = 3u + (uint32_t)segmentIndex; // reserve 1/2 for top/bottom (1 and 2); sides start at 3
+					// side triangles 
+					int sideTriIndex = t - segments; 
+					int segmentIndex = sideTriIndex / 2; 
+					faceID = (uint32_t)segments + (uint32_t)segmentIndex; 
 				}
 				else {
-					faceID = 2; // bottom
+
+					int bottomTriIndex = t - (segments + 2 * segments); 
+					faceID = (uint32_t)segments + (uint32_t)segments + (uint32_t)bottomTriIndex; 
 				}
 
 				for (int j = 0; j < 3; ++j) {
@@ -274,7 +271,6 @@ namespace Sign {
 
 			}
 
-			// Expand indices -> per-triangle vertices and assign FaceIDs sequentially
 			std::vector<VertexPosColor> finalVerts;
 			std::vector<WORD> finalIdx;
 			finalVerts.reserve(indices.size());
@@ -282,7 +278,7 @@ namespace Sign {
 
 			int triCount = (int)indices.size() / 3;
 			for (int t = 0; t < triCount; ++t) {
-				uint32_t faceID = (uint32_t)t; // keep per-triangle id (or group if desired)
+				uint32_t faceID = (uint32_t)t; 
 				for (int j = 0; j < 3; ++j) {
 					WORD src = indices[t * 3 + j];
 					VertexPosColor v;
@@ -298,19 +294,23 @@ namespace Sign {
 			return std::make_shared<Mesh>(finalVerts.data(), (uint32_t)finalVerts.size(), finalIdx.data(), (uint32_t)finalIdx.size());
 		}
 
-		// Stairs: produce per-triangle vertices and distinct FaceIDs for each step/face
-		std::shared_ptr<Mesh> Stairs::Create(int steps, float stepWidth, float stepHeight, float depthPerStep, const Vector3D& Color)
+		std::shared_ptr<Mesh> Stairs::Create(int steps, float stepWidth, float totalHeight, float totalDepth, const Vector3D& Color)
 		{
-			// Debug: print parameters
-			std::println("Stairs::Create params: steps={}, stepWidth={}, stepHeight={}, depthPerStep={}", steps, stepWidth, stepHeight, depthPerStep);
-
 			if (steps < 1) steps = 1;
+
+
+			float stepHeight = totalHeight / (float)steps;
+			float depthPerStep = totalDepth / (float)steps;
+
+
+			std::println("Stairs::Create params: steps={}, stepWidth={}, totalHeight={}, totalDepth={}", steps, stepWidth, totalHeight, totalDepth);
+
 			std::vector<VertexPosColor> finalVertices;
 			std::vector<WORD> finalIndices;
 
 			float halfW = stepWidth * 0.5f;
 
-			// Index mapping for an 8-vertex box (per-step)
+
 			static const WORD cubeIndices8[36] = {
 				// front (0,1,2,3)
 				0,1,2, 0,2,3,
@@ -332,7 +332,7 @@ namespace Sign {
 				float backZ = -(s + 1) * depthPerStep;
 				float height = (s + 1) * stepHeight;
 
-				// Debug: per-step geometry
+
 				std::println(" Stairs step {}: frontZ={}, backZ={}, height={}", s, frontZ, backZ, height);
 
 				VertexPosColor box[8] = {
@@ -346,11 +346,10 @@ namespace Sign {
 					{ Vector3D(halfW, 0.0f,  backZ), Color, 0 }
 				};
 
-				// For each triangle, create independent vertices with FaceID
-				const int triCount = 12; // 6 faces * 2 triangles
+
+				const int triCount = 12; 
 				for (int t = 0; t < triCount; ++t) {
-					uint32_t faceID = (uint32_t)(s * 6 + (t / 2)); // assign one faceID per face (two triangles)
-					// Debug: print faceID for each face (once per triangle pair)
+					uint32_t faceID = (uint32_t)(s * 6 + (t / 2));
 					if ((t % 2) == 0) {
 						std::println("  Step {} face {} assigned faceID={}", s, t / 2, faceID);
 					}
@@ -366,18 +365,18 @@ namespace Sign {
 				}
 			}
 
-			// Debug: totals and per-step verification
+
 			const size_t verts = finalVertices.size();
 			const size_t inds = finalIndices.size();
 			const size_t expectedPerStepVerts = 12 * 3; // triangles * 3 vertices
 			std::println("Stairs generation complete: verts={}, inds={}, expectedPerStepVerts={}, expectedTotalVerts={}", verts, inds, expectedPerStepVerts, expectedPerStepVerts * steps);
 
-			// Print faceIDs found per step to verify uniqueness and coverage
+
 			for (int s = 0; s < steps; ++s) {
 				size_t start = s * expectedPerStepVerts;
 				size_t end = start + expectedPerStepVerts;
 				std::println(" Step {} vertex range: [{}..{})", s, start, end);
-				// print unique faceIDs for this step
+
 				for (size_t i = start; i < end; ++i) {
 					if (i >= verts) break;
 					std::println("  vertex {} faceID={}", i, finalVertices[i].FaceID);

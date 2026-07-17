@@ -7,7 +7,7 @@ ProBuilderEditorWindow::ProBuilderEditorWindow()
 {
 }
 
-void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pending)
+void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pending, int& stairsCount)
 {
     if (!m_Open)
         return;
@@ -32,9 +32,11 @@ void ProBuilderEditorWindow::OnImGuiRender(std::vector<Sign::PrimitiveType>& pen
         pending.push_back(Sign::PrimitiveType::Sphere);
         std::println("[ProBuilder] Create Sphere clicked");
     }
-    if (ImGui::Button("Create Stairs")) {
+    ImGui::TextUnformatted("Stairs");
+    ImGui::SliderInt("Steps", &stairsCount, 1, 128); // adjust max if needed
+    if (ImGui::Button("Add Stairs")) {
+        // When EditorLayer processes the queue it will use the editor's current stairsCount
         pending.push_back(Sign::PrimitiveType::Stairs);
-        std::println("[ProBuilder] Create Stairs clicked");
     }
 
     ImGui::End();

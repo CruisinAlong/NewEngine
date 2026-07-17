@@ -7,7 +7,7 @@ namespace ProBuilder {
 class ProBuilderEditorWindow {
 public:
     ProBuilderEditorWindow();
-    void OnImGuiRender(std::vector<Sign::PrimitiveType>& pending);
+    void OnImGuiRender(std::vector<Sign::PrimitiveType>& pending, int& stairsCount);
     void SetVisible(bool v) { m_Open = v; }
     bool IsVisible() const { return m_Open; }
 private:

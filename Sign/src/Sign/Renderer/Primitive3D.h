@@ -47,7 +47,7 @@ namespace Sign {
 		struct Stairs
 		{
 		public:
-			static std::shared_ptr<Mesh> Create(int steps = 5, float stepWidth = 1.0f, float stepHeight = 0.25f, float depthPerStep = 0.5f, const Vector3D& color = Vector3D(1.0f, 1.0f, 1.0f));
+			static std::shared_ptr<Mesh> Create(int steps = 5, float stepWidth = 1.0f, float totalHeight = 1.25f, float totalDepth = 2.5f, const Vector3D& color = Vector3D(1.0f, 1.0f, 1.0f));
 		};
 
 		struct Sphere

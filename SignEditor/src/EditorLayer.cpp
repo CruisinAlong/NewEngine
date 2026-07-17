@@ -155,7 +155,7 @@ namespace Sign {
 				break;
 			case PrimitiveType::Stairs:
 				std::println("[EditorLayer] Creating Stairs primitive (calling Primitive::Stairs::Create)");
-				entity.AddComponent<MeshRendererComponent>(Primitive::Stairs::Create());
+				entity.AddComponent<MeshRendererComponent>(Primitive::Stairs::Create(m_StairsCount));
 				break;
 			default:
 				std::println("[EditorLayer] Unknown pending primitive {}", (int)pending);
@@ -292,7 +292,7 @@ namespace Sign {
 
 		if (m_ProBuilderWindow && m_ProBuilderWindow->IsVisible())
 		{
-			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes);
+			m_ProBuilderWindow->OnImGuiRender(m_PendingMeshes, m_StairsCount);
 		}
 	}
 

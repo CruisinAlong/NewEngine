@@ -53,16 +53,6 @@ namespace Sign {
 		}
 	}
 	static void DrawVec3Control(std::string_view label, Vector3D& vec, float resetValue = 0.0f, float columnWidth = 100.0f) {
-
-		float grid = 1;
-		static float translateGrid;
-		static float rotateGrid;
-		static float scaleGrid;
-
-		if (label == "Position") grid = translateGrid;
-		if (label == "Rotation") grid = rotateGrid;
-		if (label == "Scale")  grid = scaleGrid;
-
 		if (ImGui::BeginTable("Table", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit)) {
 
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
@@ -108,17 +98,32 @@ namespace Sign {
 			ImGui::EndTable();
 		}
 		
+		float grid = 1;
+		static float translateGrid;
+		static float rotateGrid;
+		static float scaleGrid;
+
+		if (label == "Position") grid = translateGrid;
+		else if (label == "Rotation") grid = rotateGrid;
+		else if (label == "Scale")  grid = scaleGrid;
+
 		ImGui::Text("Grid");
 		ImGui::SameLine();
 
-		if (label == "Position")
-		ImGui::DragFloat("##TranslateGrid", &translateGrid, 0.05f, 0.25f, 5.0f, "%.2f");
+		if (label == "Position") {
+			ImGui::DragFloat("##TranslateGrid", &translateGrid, 0.025f, 0.25f, 5.0f, "%.2f");
+			translateGrid = std::round(translateGrid / 0.05f) * 0.05f;
+		}
 
-		if (label == "Rotation")
-		ImGui::DragFloat("##RotateGrid", &rotateGrid, 5.0f, 0.0f, 45.0f, "%.2f");
+		if (label == "Rotation") {
+			ImGui::DragFloat("##RotateGrid", &rotateGrid, 3.0f, 0.0f, 45.0f, "%.2f");
+			rotateGrid = std::round(rotateGrid / 5.0f) * 5.0f;
+		}
 
-		if (label == "Scale")
-		ImGui::DragFloat("##ScaleGrid", &scaleGrid, 0.05f, 0.25f, 5.0f, "%.2f");
+		if (label == "Scale") {
+			ImGui::DragFloat("##ScaleGrid", &scaleGrid, 0.025f, 0.25f, 5.0f, "%.2f");
+			scaleGrid = std::round(scaleGrid / 0.05f) * 0.05f;
+		}
 
 		if (!Input::IsMouseButtonPressed((MouseCode)0x01) && grid > 0) {
 			vec.x = std::round(vec.x / grid) * grid;

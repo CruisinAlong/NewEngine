@@ -1,6 +1,9 @@
 # About
 This is a DXD12 Game Engine by Mathieu Marc I. Pobre using the Xmake build system
 
+This fork is a Group project for Engine Replication: Probuilder in GDENG03 made by:
+Dun Baniqued, Basil Lapuz and Mathieu Pobre
+
 # How to Set-Up
 1. Go to Scripts Folder
 3. Click the setup-windows bat file -- this is a bootstrap for xmake

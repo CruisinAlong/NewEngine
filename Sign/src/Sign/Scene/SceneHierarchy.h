@@ -13,6 +13,7 @@ namespace Sign {
 		void SetContext(const std::shared_ptr<Scene>& scene);
 
 		void OnImGuiRender();
+
 	private:
 		void DrawTreeNode(EntityECS entity);
 		void DrawComponents(EntityECS entity);

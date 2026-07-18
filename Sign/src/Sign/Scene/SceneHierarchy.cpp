@@ -2,6 +2,7 @@
 #include "SceneHierarchy.h"
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <cmath>
 
 namespace Sign {
 	SceneHierarchy::SceneHierarchy(const std::shared_ptr<Scene>& scene)
@@ -52,6 +53,16 @@ namespace Sign {
 		}
 	}
 	static void DrawVec3Control(std::string_view label, Vector3D& vec, float resetValue = 0.0f, float columnWidth = 100.0f) {
+
+		float grid = 1;
+		static float translateGrid;
+		static float rotateGrid;
+		static float scaleGrid;
+
+		if (label == "Position") grid = translateGrid;
+		if (label == "Rotation") grid = rotateGrid;
+		if (label == "Scale")  grid = scaleGrid;
+
 		if (ImGui::BeginTable("Table", 2, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingFixedFit)) {
 
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
@@ -97,6 +108,24 @@ namespace Sign {
 			ImGui::EndTable();
 		}
 		
+		ImGui::Text("Grid");
+		ImGui::SameLine();
+
+		if (label == "Position")
+		ImGui::DragFloat("##TranslateGrid", &translateGrid, 0.05f, 0.25f, 5.0f, "%.2f");
+
+		if (label == "Rotation")
+		ImGui::DragFloat("##RotateGrid", &rotateGrid, 5.0f, 0.0f, 45.0f, "%.2f");
+
+		if (label == "Scale")
+		ImGui::DragFloat("##ScaleGrid", &scaleGrid, 0.05f, 0.25f, 5.0f, "%.2f");
+
+		if (!Input::IsMouseButtonPressed((MouseCode)0x01) && grid > 0) {
+			vec.x = std::round(vec.x / grid) * grid;
+			vec.y = std::round(vec.y / grid) * grid;
+			vec.z = std::round(vec.z / grid) * grid;
+		}
+
 	}
 	void SceneHierarchy::DrawComponents(EntityECS entity)
 	{
